@@ -51,7 +51,7 @@ if __name__ == "__main__":
     print("Files loaded successfully!")
     print("Dropping columns...")
 
-    filtered_mob_alarms_df = mob_alarms_df.drop(columns=["lp_type", "lp_id"])
+    # filtered_mob_alarms_df = mob_alarms_df.drop(columns=["lp_type", "lp_id"])
 
     filtered_tx_alarms_adsl_df = tx_alarms_adsl_df.drop(columns=["lp_type", "lp_id"])
     filtered_tx_alarms_pdh_df = tx_alarms_pdh_df.drop(columns=["lp_type", "lp_id"])
@@ -66,9 +66,9 @@ if __name__ == "__main__":
 
     print("Lavori programmati loaded successfully!")
 
-    new_mob_alarms_df = associate_alarm_id_to_lp_id(
-        filtered_mob_alarms_df, lavori_programmati_df
-    )
+    # new_mob_alarms_df = associate_alarm_id_to_lp_id(
+    #     filtered_mob_alarms_df, lavori_programmati_df
+    # )
     new_tx_alarms_adsl_df = associate_alarm_id_to_lp_id(
         filtered_tx_alarms_adsl_df, lavori_programmati_df
     )
@@ -82,9 +82,9 @@ if __name__ == "__main__":
     print("Alarm IDs associated to LP IDs successfully!")
     print("Saving new datasets...")
 
-    new_mob_alarms_df.to_parquet(
-        "alarms datasets/mob/[new]20230101-20240101_inpas_mob_preprocess__an__last_event__last_event__ext1_with_lp_id.parquet"
-    )
+    # new_mob_alarms_df.to_parquet(
+    #     "alarms datasets/mob/[new]20230101-20240101_inpas_mob_preprocess__an__last_event__last_event__ext1_with_lp_id.parquet"
+    # )
     new_tx_alarms_adsl_df.to_parquet(
         "alarms datasets/tx/[new]20230101-20240101_inpas_tx_preprocess__adsl__last_event__last_event__ext1_with_lp_id.parquet"
     )
