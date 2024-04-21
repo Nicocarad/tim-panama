@@ -31,28 +31,28 @@ if __name__ == "__main__":
             
     print("Files extracted successfully!")       
             
-    # mob_alarms_df = pd.read_parquet('alarms datasets/mob/20230101-20240101_inpas_mob_preprocess__an__last_event__last_event__ext1.parquet')
+    mob_alarms_df = pd.read_parquet('alarms datasets/mob/20230101-20240101_inpas_mob_preprocess__an__last_event__last_event__ext1.parquet')
 
-    tx_alarms_adsl_df = pd.read_parquet('alarms datasets/tx/20230101-20240101_inpas_tx_preprocess__adsl__last_event__last_event__ext1.parquet')
+    # tx_alarms_adsl_df = pd.read_parquet('alarms datasets/tx/20230101-20240101_inpas_tx_preprocess__adsl__last_event__last_event__ext1.parquet')
     # tx_alarms_pdh_df = pd.read_parquet('alarms datasets/tx/20230101-20240101_inpas_tx_preprocess__pdh__last_event__last_event__ext1.parquet')
     # tx_alarms_ptn_df = pd.read_parquet('alarms datasets/tx/20230101-20240101_inpas_tx_preprocess__ptn__last_event__last_event__ext1.parquet')
 
-    print("Files loaded successfully!")
+    # print("Files loaded successfully!")
     
     # filtered_mob_alarms_df = mob_alarms_df.drop(columns=['lp_type', 'lp_id'])
 
 
-    filtered_tx_alarms_adsl_df = tx_alarms_adsl_df.drop(columns=['lp_type', 'lp_id'])
-    # filtered_tx_alarms_pdh_df = tx_alarms_pdh_df.drop(columns=['lp_type', 'lp_id'])
-    # filtered_tx_alarms_ptn_df = tx_alarms_ptn_df.drop(columns=['lp_type', 'lp_id'])
+    # # filtered_tx_alarms_adsl_df = tx_alarms_adsl_df.drop(columns=['lp_type', 'lp_id'])
+    # # filtered_tx_alarms_pdh_df = tx_alarms_pdh_df.drop(columns=['lp_type', 'lp_id'])
+    # # filtered_tx_alarms_ptn_df = tx_alarms_ptn_df.drop(columns=['lp_type', 'lp_id'])
 
-    print("Columns dropped successfully!")
+    # print("Columns dropped successfully!")
 
-    lavori_programmati_df = pd.read_csv("lavori programmati/20230101_20240101_export_cac_all_preprocessed.csv")
+    # lavori_programmati_df = pd.read_csv("lavori programmati/20230101_20240101_export_cac_all_preprocessed.csv")
     
-    print("Lavori programmati loaded successfully!")
+    # print("Lavori programmati loaded successfully!")
 
-    new_tx_alarms_adsl_df = associate_alarm_id_to_lp_id(filtered_tx_alarms_adsl_df, lavori_programmati_df)
+    # new_mob_alarms_adsl_df = associate_alarm_id_to_lp_id(filtered_mob_alarms_df, lavori_programmati_df)
     
     
-    print(new_tx_alarms_adsl_df.head())
+    # print(new_mob_alarms_adsl_df.head())
