@@ -3,7 +3,7 @@ from torch import nn, utils
 from torchvision.datasets import MNIST
 from torchvision.transforms import ToTensor
 import lightning as L
-from Model.autoencoder import LitAutoEncoder
+from model.model import LitAutoEncoder
 
 
 
@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
 
     # train the model (hint: here are some helpful Trainer arguments for rapid idea iteration)
-    trainer = L.Trainer(limit_train_batches=100, max_epochs=1, default_root_dir="Autoencoders/checkpoints/lightning_logs")
+    trainer = L.Trainer(limit_train_batches=100, max_epochs=1, default_root_dir="checkpoints/lightning_logs")
     trainer.fit(model=autoencoder, train_dataloaders=train_loader)
 
 
