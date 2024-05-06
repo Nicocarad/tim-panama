@@ -26,7 +26,7 @@ hyper_params = {
     "learning_rate": 1e-3,
     "steps": 8600,
     "batch_size": 64,
-    "epochs": 10,
+    "epochs": 20,
 }
 
 
