@@ -1,17 +1,15 @@
 import comet_ml
 from pytorch_lightning.loggers import CometLogger
-
-
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, random_split
 from torchvision.datasets import MNIST
 import torchvision.transforms as transforms
 import pytorch_lightning as pl
+import torch
 
-
-
-import matplotlib.pyplot as plt
+# Verifica la disponibilità delle GPU
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Creazione del logger una sola volta
 comet_logger = CometLogger(
@@ -20,7 +18,6 @@ comet_logger = CometLogger(
     experiment_name="MNIST autoencoder",
 )
 
-
 # Report multiple hyperparameters using a dictionary:
 hyper_params = {
     "learning_rate": 1e-3,
@@ -28,7 +25,6 @@ hyper_params = {
     "batch_size": 64,
     "epochs": 20,
 }
-
 
 comet_logger.log_hyperparams(hyper_params)
 
@@ -82,20 +78,6 @@ class LinearAutoencoder(pl.LightningModule):
         loss = nn.MSELoss()(x_hat, x)
         self.log("test_loss", loss)
 
-        # if batch_idx == 0:  # Mostra solo la prima immagine del batch
-        #     original_images = x.view(-1, 1, 28, 28)[:8].cpu()
-        #     reconstructed_images = x_hat.view(-1, 1, 28, 28)[:8].cpu()
-        #     fig, axes = plt.subplots(nrows=2, ncols=8, figsize=(16, 4))
-        #     for i in range(8):
-        #         axes[0, i].imshow(original_images[i].squeeze(), cmap="gray")
-        #         axes[0, i].axis("off")
-        #         axes[0, i].set_title(f"Original {i}")
-        #         axes[1, i].imshow(reconstructed_images[i].squeeze(), cmap="gray")
-        #         axes[1, i].axis("off")
-        #         axes[1, i].set_title(f"Reconstructed {i}")
-        #     plt.show()
-        
-
     def validation_step(self, batch, batch_idx):
         x, y = batch
         x = x.view(x.size(0), -1)
@@ -115,18 +97,16 @@ transform = transforms.Compose(
 dataset = MNIST(root="./data", train=True, download=True, transform=transform)
 mnist_train, mnist_val = random_split(dataset, [55000, 5000])
 
-train_loader = DataLoader(mnist_train, batch_size=64, num_workers=4)
-test_loader = DataLoader(mnist_val, batch_size=64, num_workers=4)
+train_loader = DataLoader(mnist_train, batch_size=hyper_params["batch_size"], num_workers=4)
+test_loader = DataLoader(mnist_val, batch_size=hyper_params["batch_size"], num_workers=4)
 
 # Creazione del modello e trainer
-autoencoder = LinearAutoencoder(hyper_params)
+autoencoder = LinearAutoencoder(hyper_params).to(device)
 # Add CometLogger to your Trainer
 trainer = pl.Trainer(max_epochs=hyper_params["epochs"], logger=comet_logger)
 
-
 # Allenamento del modello
 trainer.fit(autoencoder, train_loader, val_dataloaders=test_loader)
-
 
 # Valutazione del modello
 trainer.test(autoencoder, test_loader)
