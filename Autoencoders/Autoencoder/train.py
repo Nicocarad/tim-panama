@@ -48,10 +48,10 @@ print("Train dataset length: ", len(train_dataset))
 print("Val dataset length: ", len(val_dataset))
 
 train_loader = DataLoader(
-    train_dataset, batch_size=hyper_params["batch_size"], num_workers=4,drop_last=True
+    train_dataset, batch_size=hyper_params["batch_size"], num_workers=1,drop_last=True
 )
 test_loader = DataLoader(
-    val_dataset, batch_size=hyper_params["batch_size"], num_workers=4,drop_last=True
+    val_dataset, batch_size=hyper_params["batch_size"], num_workers=1,drop_last=True
 )
 
 # Creazione del modello e trainer
