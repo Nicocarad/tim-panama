@@ -17,9 +17,8 @@ comet_logger = CometLogger(
 # Report multiple hyperparameters using a dictionary:
 hyper_params = {
     "learning_rate": 1e-3,
-    "steps": 8600,
     "batch_size": 64,
-    "epochs": 10,
+    "epochs": 1,
     "input_size": 87,
     "cutting_threshold": 0.5,
 }
@@ -48,11 +47,14 @@ print("Train dataset length: ", len(train_dataset))
 print("Val dataset length: ", len(val_dataset))
 
 train_loader = DataLoader(
-    train_dataset, batch_size=hyper_params["batch_size"], num_workers=1,drop_last=True
+    train_dataset, batch_size=hyper_params["batch_size"], num_workers=1, drop_last=True
 )
 test_loader = DataLoader(
-    val_dataset, batch_size=hyper_params["batch_size"], num_workers=1,drop_last=True
+    val_dataset, batch_size=hyper_params["batch_size"], num_workers=1, drop_last=True
 )
+
+print("Expected data per epoch: ", len(train_loader) * hyper_params["batch_size"])
+print("Expected data per epoch: ", len(test_loader) * hyper_params["batch_size"])
 
 # Creazione del modello e trainer
 autoencoder = LinearAutoencoder(hyper_params)

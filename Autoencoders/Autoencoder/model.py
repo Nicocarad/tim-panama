@@ -1,9 +1,7 @@
 import torch.nn as nn
 import torch.optim as optim
-import torch
 import pytorch_lightning as pl
-import torchmetrics
-
+from metrics import PerfectReconstruction, ColumnWiseAccuracy, ColumnWisePrecision, ColumnWiseRecall, ColumnWiseF1
 
 class LinearAutoencoder(pl.LightningModule):
     def __init__(self, hyper_params):
@@ -12,6 +10,7 @@ class LinearAutoencoder(pl.LightningModule):
         self.hyper_params = hyper_params
 
         self.input_size = hyper_params["input_size"]
+        self.batch_size = hyper_params["batch_size"]
         self.cutting_threshold = hyper_params["cutting_threshold"]
 
         # Definizione dell'encoder
@@ -36,68 +35,120 @@ class LinearAutoencoder(pl.LightningModule):
 
         # Inizializzazione della metrica
         self.perfect_reconstruction = PerfectReconstruction()
+        self.column_wise_accuracy = ColumnWiseAccuracy(self.input_size)
+        self.column_wise_precision = ColumnWisePrecision(self.input_size)
+        self.column_wise_recall = ColumnWiseRecall(self.input_size)
+        self.column_wise_f1 = ColumnWiseF1(self.input_size)
 
     def forward(self, x):
         encoded = self.encoder(x)
         decoded = self.decoder(encoded)
         return decoded
 
+    def configure_optimizers(self):
+        return optim.Adam(self.parameters(), lr=self.hyper_params["learning_rate"])
+
+    def compute_loss(self, x, x_hat):
+        return nn.MSELoss()(x_hat, x)
+
+    def update_metrics(self, x, x_hat):
+        x_hat = (x_hat > self.cutting_threshold).float()
+        self.perfect_reconstruction.update(x_hat, x)
+        self.column_wise_accuracy.update(x_hat, x)
+        self.column_wise_precision.update(x_hat, x)
+        self.column_wise_recall.update(x_hat, x)
+        self.column_wise_f1.update(x_hat, x)
+
     def training_step(self, batch, batch_idx):
         x, _ = batch
         x = x.view(x.size(0), -1)
         x_hat = self(x)
-        loss = nn.MSELoss()(x_hat, x)
-        self.log("train_loss", loss)
-        x_hat = (x_hat > self.cutting_threshold).float()
-        self.perfect_reconstruction.update(x_hat, x)
+        loss = self.compute_loss(x, x_hat)
+        self.log("train_loss", loss, batch_size=self.batch_size, sync_dist=True)
         return loss
-
-    def on_training_epoch_end(self):
-        self.log("train_perfect_reconstruction", self.perfect_reconstruction.compute())
-        self.perfect_reconstruction.reset()
-
-    def configure_optimizers(self):
-        return optim.Adam(self.parameters(), lr=self.hyper_params["learning_rate"])
-
-    def test_step(self, batch, batch_idx):
-        x, _ = batch
-        x = x.view(x.size(0), -1)
-        x_hat = self(x)
-        loss = nn.MSELoss()(x_hat, x)
-        self.log("test_loss", loss)
-        x_hat = (x_hat > self.cutting_threshold).float()
-        self.perfect_reconstruction.update(x_hat, x)
-
-    def on_test_epoch_end(self):
-        self.log("test_perfect_reconstruction", self.perfect_reconstruction.compute())
-        self.perfect_reconstruction.reset()
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
         x = x.view(x.size(0), -1)
         x_hat = self(x)
-        # Calcolo della loss della validazione
-        loss = nn.MSELoss()(x_hat, x)
-        self.log("val_loss", loss)
-        x_hat = (x_hat > self.cutting_threshold).float()
-        self.perfect_reconstruction.update(x_hat, x)
+        loss = self.compute_loss(x, x_hat)
+        self.log("val_loss", loss, sync_dist=True)
+        self.update_metrics(x, x_hat)
 
     def on_validation_epoch_end(self):
-        self.log("val_perfect_reconstruction", self.perfect_reconstruction.compute())
+        self.log(
+            "val_perfect_reconstruction",
+            self.perfect_reconstruction.compute(),
+            sync_dist=True,
+        )
+        self.log(
+            "val_column_wise_accuracy",
+            self.column_wise_accuracy.compute(),
+            sync_dist=True,
+        )
+        self.log(
+            "val_column_wise_precision",
+            self.column_wise_precision.compute(),
+            sync_dist=True,
+        )
+        self.log(
+            "val_column_wise_recall",
+            self.column_wise_recall.compute(),
+            sync_dist=True,
+        )
+        self.log(
+            "val_column_wise_f1",
+            self.column_wise_f1.compute(),
+            sync_dist=True,
+        )
+
         self.perfect_reconstruction.reset()
+        self.column_wise_accuracy.reset()
+        self.column_wise_precision.reset()
+        self.column_wise_recall.reset()
+        self.column_wise_f1.reset()
+
+    def test_step(self, batch, batch_idx):
+        x, _ = batch
+        x = x.view(x.size(0), -1)
+        x_hat = self(x)
+        loss = self.compute_loss(x, x_hat)
+        self.log("test_loss", loss)
+        self.update_metrics(x, x_hat)
+
+    def on_test_epoch_end(self):
+        self.log(
+            "test_perfect_reconstruction",
+            self.perfect_reconstruction.compute(),
+            sync_dist=True,
+        )
+        self.log(
+            "test_column_wise_accuracy",
+            self.column_wise_accuracy.compute(),
+            sync_dist=True,
+        )
+        self.log(
+            "test_column_wise_precision",
+            self.column_wise_precision.compute(),
+            sync_dist=True,
+        )
+        self.log(
+            "test_column_wise_recall",
+            self.column_wise_recall.compute(),
+            sync_dist=True,
+        )
+        self.log(
+            "test_column_wise_f1",
+            self.column_wise_f1.compute(),
+            sync_dist=True,
+        )
+
+        self.perfect_reconstruction.reset()
+        self.column_wise_accuracy.reset()
+        self.column_wise_precision.reset()
+        self.column_wise_recall.reset()
+        self.column_wise_f1.reset()
 
 
 
-class PerfectReconstruction(torchmetrics.Metric):
-    def __init__(self, dist_sync_on_step=False):
-        super().__init__(dist_sync_on_step=dist_sync_on_step)
-        self.add_state("perfect", default=torch.tensor(0), dist_reduce_fx="sum")
-        self.add_state("total", default=torch.tensor(0), dist_reduce_fx="sum")
 
-    def update(self, preds, target):
-        assert preds.shape == target.shape
-        self.perfect += torch.sum(torch.all(preds == target, dim=1)).item()
-        self.total += target.shape[0]
-
-    def compute(self):
-        return self.perfect / self.total
