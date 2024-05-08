@@ -49,15 +49,20 @@ class BaseMetric(torchmetrics.Metric):
         self.add_state(
             "false_negatives", default=torch.zeros(num_columns), dist_reduce_fx="sum"
         )
+        self.add_state(
+            "true_negatives", default=torch.zeros(num_columns), dist_reduce_fx="sum"
+        )
 
     def update(self, preds, target):
         assert preds.shape == target.shape
         true_positives = torch.sum((preds == 1) & (target == 1), dim=0).float()
         false_positives = torch.sum((preds == 1) & (target == 0), dim=0).float()
         false_negatives = torch.sum((preds == 0) & (target == 1), dim=0).float()
+        true_negatives = torch.sum((preds == 0) & (target == 0), dim=0).float()
         self.true_positives += true_positives
         self.false_positives += false_positives
         self.false_negatives += false_negatives
+        self.true_negatives += true_negatives
 
 
 class ColumnWiseAccuracy(BaseMetric):
@@ -67,8 +72,8 @@ class ColumnWiseAccuracy(BaseMetric):
     """
 
     def compute(self):
-        total = self.true_positives + self.false_positives + self.false_negatives
-        correct = self.true_positives
+        total = self.true_positives + self.false_positives + self.false_negatives + self.true_negatives
+        correct = self.true_positives + self.true_negatives
         global_accuracy = torch.mean(
             torch.where(total > 0, correct / total, torch.zeros_like(total))
         )
