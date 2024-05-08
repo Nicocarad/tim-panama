@@ -18,7 +18,7 @@ comet_logger = CometLogger(
 hyper_params = {
     "learning_rate": 1e-3,
     "batch_size": 64,
-    "epochs": 1,
+    "epochs": 20,
     "input_size": 87,
     "cutting_threshold": 0.5,
 }
