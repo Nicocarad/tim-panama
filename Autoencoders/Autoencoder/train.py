@@ -44,6 +44,9 @@ val_indexes = splitting[1]
 train_dataset = Subset(original_dataset, train_indexes)
 val_dataset = Subset(original_dataset, val_indexes)
 
+print("Train dataset length: ", len(train_dataset))
+print("Val dataset length: ", len(val_dataset))
+
 train_loader = DataLoader(
     train_dataset, batch_size=hyper_params["batch_size"], num_workers=4,drop_last=True
 )

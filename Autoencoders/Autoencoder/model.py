@@ -40,8 +40,6 @@ class LinearAutoencoder(pl.LightningModule):
     def forward(self, x):
         encoded = self.encoder(x)
         decoded = self.decoder(encoded)
-        decoded = (decoded > self.cutting_threshold).float().detach()
-        decoded.requires_grad = True
         return decoded
 
     def training_step(self, batch, batch_idx):
@@ -50,7 +48,7 @@ class LinearAutoencoder(pl.LightningModule):
         x_hat = self(x)
         loss = nn.MSELoss()(x_hat, x)
         self.log("train_loss", loss)
-        #x_hat = (x_hat > self.cutting_threshold).float()
+        x_hat = (x_hat > self.cutting_threshold).float()
         self.perfect_reconstruction.update(x_hat, x)
         return loss
 
@@ -67,7 +65,7 @@ class LinearAutoencoder(pl.LightningModule):
         x_hat = self(x)
         loss = nn.MSELoss()(x_hat, x)
         self.log("test_loss", loss)
-        #x_hat = (x_hat > self.cutting_threshold).float()
+        x_hat = (x_hat > self.cutting_threshold).float()
         self.perfect_reconstruction.update(x_hat, x)
 
     def on_test_epoch_end(self):
@@ -81,7 +79,7 @@ class LinearAutoencoder(pl.LightningModule):
         # Calcolo della loss della validazione
         loss = nn.MSELoss()(x_hat, x)
         self.log("val_loss", loss)
-        #x_hat = (x_hat > self.cutting_threshold).float()
+        x_hat = (x_hat > self.cutting_threshold).float()
         self.perfect_reconstruction.update(x_hat, x)
 
     def on_validation_epoch_end(self):
