@@ -2,8 +2,12 @@ import torch
 import torchmetrics
 
 
-
 class PerfectReconstruction(torchmetrics.Metric):
+    """
+    This metric calculates the number of perfect predictions, i.e., the number of times the entire prediction vector
+    exactly matches the target vector.
+    """
+
     def __init__(self, dist_sync_on_step=False):
         super().__init__(dist_sync_on_step=dist_sync_on_step)
         # Aggiunge uno stato "perfect" per tenere traccia del numero di previsioni perfette
@@ -25,10 +29,14 @@ class PerfectReconstruction(torchmetrics.Metric):
         print(f"Total: {self.total}")
         # Calcola e restituisce l'accuracy come il rapporto tra le previsioni perfette e il totale delle previsioni
         return self.perfect / self.total
-    
 
 
 class BaseMetric(torchmetrics.Metric):
+    """
+    This is a base class for metrics that calculate statistics for each column of the prediction and target tensors.
+    It maintains the count of true positives, false positives, and false negatives for each column.
+    """
+
     def __init__(self, num_columns, dist_sync_on_step=False):
         super().__init__(dist_sync_on_step=dist_sync_on_step)
         self.num_columns = num_columns
@@ -53,6 +61,11 @@ class BaseMetric(torchmetrics.Metric):
 
 
 class ColumnWiseAccuracy(BaseMetric):
+    """
+    This metric calculates the accuracy for each column of the prediction and target tensors.
+    Accuracy is defined as the number of true positives divided by the total number of predictions.
+    """
+
     def compute(self):
         total = self.true_positives + self.false_positives + self.false_negatives
         correct = self.true_positives
@@ -63,6 +76,11 @@ class ColumnWiseAccuracy(BaseMetric):
 
 
 class ColumnWisePrecision(BaseMetric):
+    """
+    This metric calculates the precision for each column of the prediction and target tensors.
+    Precision is defined as the number of true positives divided by the number of true positives plus false positives.
+    """
+
     def compute(self):
         denominator = self.true_positives + self.false_positives
         global_precision = torch.mean(
@@ -76,6 +94,11 @@ class ColumnWisePrecision(BaseMetric):
 
 
 class ColumnWiseRecall(BaseMetric):
+    """
+    This metric calculates the recall for each column of the prediction and target tensors.
+    Recall is defined as the number of true positives divided by the number of true positives plus false negatives.
+    """
+
     def compute(self):
         denominator = self.true_positives + self.false_negatives
         global_recall = torch.mean(
@@ -89,6 +112,11 @@ class ColumnWiseRecall(BaseMetric):
 
 
 class ColumnWiseF1(BaseMetric):
+    """
+    This metric calculates the F1 score for each column of the prediction and target tensors.
+    The F1 score is the harmonic mean of precision and recall.
+    """
+
     def compute(self):
         precision = self.true_positives / (self.true_positives + self.false_positives)
         recall = self.true_positives / (self.true_positives + self.false_negatives)
