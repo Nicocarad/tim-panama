@@ -1,9 +1,9 @@
 import comet_ml
 from pytorch_lightning.loggers import CometLogger
 from torch.utils.data import Subset, DataLoader
-from Autoencoders.Autoencoder import TIMCL
+from TIMCL import TIMCL
 import pytorch_lightning as pl
-from Autoencoders.Autoencoder.model import LinearAutoencoder
+from model import LinearAutoencoder
 from sklearn.model_selection import train_test_split
 
 
@@ -19,7 +19,7 @@ hyper_params = {
     "learning_rate": 1e-3,
     "steps": 8600,
     "batch_size": 64,
-    "epochs": 20,
+    "epochs": 10,
     "input_size": 87,
     "cutting_threshold": 0.5,
 }
