@@ -12,16 +12,17 @@ import torch
 comet_logger = CometLogger(
     api_key="knoxznRgLLK2INEJ9GIbmR7ww",
     project_name="TIM_thesis",
-    experiment_name="TIM autoencoder",
+    experiment_name="TIM autoencoder lr=1e-4",
 )
 
 # Report multiple hyperparameters using a dictionary:
 hyper_params = {
-    "learning_rate": 1e-3,
+    "learning_rate": 1e-4,
     "batch_size": 64,
     "epochs": 20,
     "input_size": 87,
     "cutting_threshold": 0.5,
+    "optimizer": "SGD"
 }
 
 comet_logger.log_hyperparams(hyper_params)

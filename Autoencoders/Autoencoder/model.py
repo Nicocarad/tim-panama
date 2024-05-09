@@ -12,6 +12,8 @@ class LinearAutoencoder(pl.LightningModule):
         self.input_size = hyper_params["input_size"]
         self.batch_size = hyper_params["batch_size"]
         self.cutting_threshold = hyper_params["cutting_threshold"]
+        self.optimizer_type = hyper_params["optimizer"]
+        self.learning_rate = self.hyper_params["learning_rate"]
 
         # Definizione dell'encoder
         self.encoder = nn.Sequential(
@@ -46,7 +48,25 @@ class LinearAutoencoder(pl.LightningModule):
         return decoded
 
     def configure_optimizers(self):
-        return optim.Adam(self.parameters(), lr=self.hyper_params["learning_rate"])
+        
+        
+
+        if self.optimizer_type == "Adam":
+            optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
+        elif self.optimizer_type == "SGD":
+            optimizer = optim.SGD(self.parameters(), lr=self.learning_rate)
+        elif self.optimizer_type == "RMSprop":
+            optimizer = optim.RMSprop(self.parameters(), lr=self.learning_rate)
+        elif self.optimizer_type == "Adagrad":
+            optimizer = optim.Adagrad(self.parameters(), lr=self.learning_rate)
+        elif self.optimizer_type == "Adamax":
+            optimizer = optim.Adamax(self.parameters(), lr=self.learning_rate)
+        elif self.optimizer_type == "Adadelta":
+            optimizer = optim.Adadelta(self.parameters(), lr=self.learning_rate)
+        else:
+            raise ValueError(f"Unsupported optimizer type: {self.optimizer_type}")
+
+        return optimizer
 
     def compute_loss(self, x, x_hat):
         return nn.MSELoss()(x_hat, x)
