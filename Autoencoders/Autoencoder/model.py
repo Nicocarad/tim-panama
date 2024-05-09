@@ -64,7 +64,9 @@ class LinearAutoencoder(pl.LightningModule):
         x = x.view(x.size(0), -1)
         x_hat = self(x)
         loss = self.compute_loss(x, x_hat)
-        self.log("train_loss", loss, batch_size=self.batch_size, sync_dist=True)
+        
+        self.log("train_loss", loss, sync_dist=True)
+        
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -73,6 +75,8 @@ class LinearAutoencoder(pl.LightningModule):
         x_hat = self(x)
         loss = self.compute_loss(x, x_hat)
         self.log("val_loss", loss, sync_dist=True)
+        bce = nn.BCELoss()(x_hat, x)
+        self.log("val_bce", bce, sync_dist=True)
         self.update_metrics(x, x_hat)
 
     def on_validation_epoch_end(self):
@@ -114,6 +118,8 @@ class LinearAutoencoder(pl.LightningModule):
         x_hat = self(x)
         loss = self.compute_loss(x, x_hat)
         self.log("test_loss", loss)
+        bce = nn.BCELoss()(x_hat, x)
+        self.log("val_bce", bce, sync_dist=True)
         self.update_metrics(x, x_hat)
 
     def on_test_epoch_end(self):

@@ -5,6 +5,7 @@ from TIMCL import TIMCL
 import pytorch_lightning as pl
 from model import LinearAutoencoder
 from sklearn.model_selection import train_test_split
+import torch
 
 
 # Creazione del logger una sola volta
@@ -46,11 +47,21 @@ val_dataset = Subset(original_dataset, val_indexes)
 print("Train dataset length: ", len(train_dataset))
 print("Val dataset length: ", len(val_dataset))
 
+torch.manual_seed(42)
+
 train_loader = DataLoader(
-    train_dataset, batch_size=hyper_params["batch_size"], num_workers=1, drop_last=True
+    train_dataset,
+    batch_size=hyper_params["batch_size"],
+    num_workers=1,
+    drop_last=True,
+    shuffle=True,
 )
 test_loader = DataLoader(
-    val_dataset, batch_size=hyper_params["batch_size"], num_workers=1, drop_last=True
+    val_dataset,
+    batch_size=hyper_params["batch_size"],
+    num_workers=1,
+    drop_last=True,
+    shuffle=True,
 )
 
 print("Expected data per epoch: ", len(train_loader) * hyper_params["batch_size"])

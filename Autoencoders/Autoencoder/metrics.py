@@ -84,6 +84,7 @@ class ColumnWisePrecision(BaseMetric):
     """
     This metric calculates the precision for each column of the prediction and target tensors.
     Precision is defined as the number of true positives divided by the number of true positives plus false positives.
+    It shows how many of the positive predictions (columns with 1) are actually correct.
     """
 
     def compute(self):
@@ -102,6 +103,7 @@ class ColumnWiseRecall(BaseMetric):
     """
     This metric calculates the recall for each column of the prediction and target tensors.
     Recall is defined as the number of true positives divided by the number of true positives plus false negatives.
+    It shows how many positives (columns with 1) are correctly identified by the model.
     """
 
     def compute(self):
