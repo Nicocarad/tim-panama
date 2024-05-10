@@ -73,7 +73,7 @@ val_loader = DataLoader(
     batch_size=hyper_params["batch_size"],
     num_workers=1,
     drop_last=True,
-    shuffle=True,
+    shuffle=False,
 )
 
 test_loader = DataLoader(
@@ -81,7 +81,7 @@ test_loader = DataLoader(
     batch_size=hyper_params["batch_size"],
     num_workers=1,
     drop_last=True,
-    shuffle=True,
+    shuffle=False,
 )
 
 

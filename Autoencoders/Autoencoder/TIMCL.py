@@ -7,6 +7,7 @@ class TIMCL(Dataset):
     def __init__(self, data_path):
         self.data = pd.read_parquet(data_path)
         self.cluster_ids = self.data.index  # Utilizza l'indice del DataFrame
+        self.slogan = self.data.columns
 
     def __getitem__(self, idx):
         # Restituisce una riga del dataset e l'ID del cluster come un tensore

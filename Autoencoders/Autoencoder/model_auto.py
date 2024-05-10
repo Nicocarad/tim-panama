@@ -1,7 +1,15 @@
 import torch.nn as nn
 import torch.optim as optim
 import pytorch_lightning as pl
-from metrics import PerfectReconstruction, ColumnWiseAccuracy, ColumnWisePrecision, ColumnWiseRecall, ColumnWiseF1
+from metrics import (
+    PerfectReconstruction,
+    ColumnWiseAccuracy,
+    ColumnWisePrecision,
+    ColumnWiseRecall,
+    ColumnWiseF1,
+    ColumnWiseF1PerColumn,
+)
+
 
 class LinearAutoencoder(pl.LightningModule):
     def __init__(self, hyper_params):
@@ -41,6 +49,7 @@ class LinearAutoencoder(pl.LightningModule):
         self.column_wise_precision = ColumnWisePrecision(self.input_size)
         self.column_wise_recall = ColumnWiseRecall(self.input_size)
         self.column_wise_f1 = ColumnWiseF1(self.input_size)
+        self.column_wise_f1_per_column = ColumnWiseF1PerColumn()
 
     def forward(self, x):
         encoded = self.encoder(x)
@@ -48,8 +57,6 @@ class LinearAutoencoder(pl.LightningModule):
         return decoded
 
     def configure_optimizers(self):
-        
-        
 
         if self.optimizer_type == "Adam":
             optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
@@ -78,15 +85,16 @@ class LinearAutoencoder(pl.LightningModule):
         self.column_wise_precision.update(x_hat, x)
         self.column_wise_recall.update(x_hat, x)
         self.column_wise_f1.update(x_hat, x)
+        self.column_wise_f1_per_column.update(x_hat, x)
 
     def training_step(self, batch, batch_idx):
         x, _ = batch
         x = x.view(x.size(0), -1)
         x_hat = self(x)
         loss = self.compute_loss(x, x_hat)
-        
+
         self.log("train_loss", loss, sync_dist=True)
-        
+
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -125,12 +133,18 @@ class LinearAutoencoder(pl.LightningModule):
             self.column_wise_f1.compute(),
             sync_dist=True,
         )
+        self.log(
+            "val_column_wise_f1_per_column",
+            self.column_wise_f1_per_column.compute(),
+            sync_dist=True,
+        )
 
         self.perfect_reconstruction.reset()
         self.column_wise_accuracy.reset()
         self.column_wise_precision.reset()
         self.column_wise_recall.reset()
         self.column_wise_f1.reset()
+        self.column_wise_f1_per_column.reset()
 
     def test_step(self, batch, batch_idx):
         x, _ = batch
@@ -168,13 +182,15 @@ class LinearAutoencoder(pl.LightningModule):
             self.column_wise_f1.compute(),
             sync_dist=True,
         )
+        self.log(
+            "val_column_wise_f1_per_column",
+            self.column_wise_f1_per_column.compute(),
+            sync_dist=True,
+        )
 
         self.perfect_reconstruction.reset()
         self.column_wise_accuracy.reset()
         self.column_wise_precision.reset()
         self.column_wise_recall.reset()
         self.column_wise_f1.reset()
-
-
-
-
+        self.column_wise_f1_per_column.reset()

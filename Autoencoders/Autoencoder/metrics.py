@@ -74,6 +74,11 @@ class ColumnWiseAccuracy(BaseMetric):
     def compute(self):
         total = self.true_positives + self.false_positives + self.false_negatives + self.true_negatives
         correct = self.true_positives + self.true_negatives
+        print("True positives: ", self.true_positives)
+        print("False positives: ", self.false_positives)
+        print(f"Total: {total}")
+        print(f"Correct: {correct}")
+        
         global_accuracy = torch.mean(
             torch.where(total > 0, correct / total, torch.zeros_like(total))
         )
@@ -132,3 +137,18 @@ class ColumnWiseF1(BaseMetric):
             torch.where(torch.isfinite(f1), f1, torch.zeros_like(f1))
         )
         return global_f1
+    
+    
+    
+class ColumnWiseF1PerColumn(BaseMetric):
+    """
+    This metric calculates the F1 score for each individual column of the prediction and target tensors.
+    The F1 score is the harmonic mean of precision and recall.
+    """
+
+    def compute(self):
+        precision = self.true_positives / (self.true_positives + self.false_positives)
+        recall = self.true_positives / (self.true_positives + self.false_negatives)
+        f1 = 2 * (precision * recall) / (precision + recall)
+        f1_per_column = torch.where(torch.isfinite(f1), f1, torch.zeros_like(f1))
+        return f1_per_column
