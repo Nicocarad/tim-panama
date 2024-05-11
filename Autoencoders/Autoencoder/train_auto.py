@@ -1,4 +1,5 @@
 import comet_ml
+from comet_ml import Experiment
 from pytorch_lightning.loggers import CometLogger
 from torch.utils.data import Subset, DataLoader
 from TIMCL import TIMCL
@@ -6,6 +7,8 @@ import pytorch_lightning as pl
 from model_auto import LinearAutoencoder
 from sklearn.model_selection import train_test_split
 import torch
+import pandas as pd
+from utils_auto import plot_occurrences, create_df
 
 
 # Creazione del logger una sola volta
@@ -15,6 +18,9 @@ comet_logger = CometLogger(
     experiment_name="TIM autoencoder two layer 30epochs",
 )
 
+experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
+
+
 # Report multiple hyperparameters using a dictionary:
 hyper_params = {
     "learning_rate": 1e-3,
@@ -22,17 +28,13 @@ hyper_params = {
     "epochs": 1,
     "input_size": 87,
     "cutting_threshold": 0.5,
-    "optimizer": "Adam"
+    "optimizer": "Adam",
 }
 
 comet_logger.log_hyperparams(hyper_params)
 
 
-# Creazione del dataset originale
-from sklearn.model_selection import train_test_split
-
 original_dataset = TIMCL("result_df_gt_2.parquet")
-
 indexes = range(0, len(original_dataset))
 
 
@@ -58,6 +60,21 @@ test_dataset = Subset(original_dataset, test_indexes)
 print("Train dataset length: ", len(train_dataset))
 print("Val dataset length: ", len(val_dataset))
 print("Test dataset length: ", len(test_dataset))
+
+
+train_df = create_df(original_dataset, train_indexes)
+val_df = create_df(original_dataset, val_indexes)
+test_df = create_df(original_dataset, test_indexes)
+
+train_df.to_parquet("train_df.parquet")
+val_df.to_parquet("val_df.parquet")
+test_df.to_parquet("test_df.parquet")
+
+
+print("Train DataFrame shape: ", train_df.shape)
+print("Val DataFrame shape: ", val_df.shape)
+print("Test DataFrame shape: ", test_df.shape)
+
 
 torch.manual_seed(42)
 
@@ -85,14 +102,16 @@ test_loader = DataLoader(
 )
 
 
-
-# Creazione del modello e trainer
 autoencoder = LinearAutoencoder(hyper_params)
-# Add CometLogger to your Trainer
-trainer = pl.Trainer(max_epochs=hyper_params["epochs"], logger=comet_logger, default_root_dir="Checkpoints/")
 
-# Allenamento del modello
+trainer = pl.Trainer(
+    max_epochs=hyper_params["epochs"],
+    logger=comet_logger,
+    default_root_dir="Checkpoints/",
+)
+
+
 trainer.fit(autoencoder, train_loader, val_dataloaders=val_loader)
 
-# Valutazione del modello
+
 trainer.test(autoencoder, test_loader)
