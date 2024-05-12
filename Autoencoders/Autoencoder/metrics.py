@@ -76,6 +76,8 @@ class ColumnWiseAccuracy(BaseMetric):
         correct = self.true_positives + self.true_negatives
         print("True positives: ", self.true_positives)
         print("False positives: ", self.false_positives)
+        print("False negatives: ", self.false_negatives)
+        print("True negatives: ", self.true_negatives)
         print(f"Total: {total}")
         print(f"Correct: {correct}")
         

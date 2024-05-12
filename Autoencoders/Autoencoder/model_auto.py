@@ -9,10 +9,12 @@ from metrics import (
     ColumnWiseF1,
     ColumnWiseF1PerColumn,
 )
+import numpy as np
+import pandas as pd
 
 
 class LinearAutoencoder(pl.LightningModule):
-    def __init__(self, hyper_params):
+    def __init__(self, hyper_params, slogans):
         super(LinearAutoencoder, self).__init__()
 
         self.hyper_params = hyper_params
@@ -22,6 +24,10 @@ class LinearAutoencoder(pl.LightningModule):
         self.cutting_threshold = hyper_params["cutting_threshold"]
         self.optimizer_type = hyper_params["optimizer"]
         self.learning_rate = self.hyper_params["learning_rate"]
+        self.denoise = self.hyper_params["denoise"]
+
+        self.slogans = slogans
+        self.reconstructed_vectors = []
 
         # Definizione dell'encoder
         self.encoder = nn.Sequential(
@@ -49,7 +55,7 @@ class LinearAutoencoder(pl.LightningModule):
         self.column_wise_precision = ColumnWisePrecision(self.input_size)
         self.column_wise_recall = ColumnWiseRecall(self.input_size)
         self.column_wise_f1 = ColumnWiseF1(self.input_size)
-        self.column_wise_f1_per_column = ColumnWiseF1PerColumn()
+        self.column_wise_f1_per_column = ColumnWiseF1PerColumn(self.input_size)
 
     def forward(self, x):
         encoded = self.encoder(x)
@@ -88,9 +94,13 @@ class LinearAutoencoder(pl.LightningModule):
         self.column_wise_f1_per_column.update(x_hat, x)
 
     def training_step(self, batch, batch_idx):
-        x, _ = batch
-        x = x.view(x.size(0), -1)
-        x_hat = self(x)
+        x, masked_x, _ = batch
+        if self.denoise == True:
+            masked_x = masked_x.view(masked_x.size(0), -1)
+            x_hat = self(masked_x)
+        else:
+            x = x.view(x.size(0), -1)
+            x_hat = self(x)
         loss = self.compute_loss(x, x_hat)
 
         self.log("train_loss", loss, sync_dist=True)
@@ -98,9 +108,13 @@ class LinearAutoencoder(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        x, y = batch
-        x = x.view(x.size(0), -1)
-        x_hat = self(x)
+        x, masked_x, _ = batch
+        if self.denoise == True:
+            masked_x = masked_x.view(masked_x.size(0), -1)
+            x_hat = self(masked_x)
+        else:
+            x = x.view(x.size(0), -1)
+            x_hat = self(x)
         loss = self.compute_loss(x, x_hat)
         self.log("val_loss", loss, sync_dist=True)
         bce = nn.BCELoss()(x_hat, x)
@@ -133,11 +147,9 @@ class LinearAutoencoder(pl.LightningModule):
             self.column_wise_f1.compute(),
             sync_dist=True,
         )
-        self.log(
-            "val_column_wise_f1_per_column",
-            self.column_wise_f1_per_column.compute(),
-            sync_dist=True,
-        )
+        column_wise_f1 = self.column_wise_f1_per_column.compute()
+        for i, val in enumerate(column_wise_f1):
+            self.log(f"val_f1_{self.slogans[i]}", val, sync_dist=True)
 
         self.perfect_reconstruction.reset()
         self.column_wise_accuracy.reset()
@@ -147,14 +159,19 @@ class LinearAutoencoder(pl.LightningModule):
         self.column_wise_f1_per_column.reset()
 
     def test_step(self, batch, batch_idx):
-        x, _ = batch
-        x = x.view(x.size(0), -1)
-        x_hat = self(x)
+        x, masked_x, _ = batch
+        if self.denoise == True:
+            masked_x = masked_x.view(masked_x.size(0), -1)
+            x_hat = self(masked_x)
+        else:
+            x = x.view(x.size(0), -1)
+            x_hat = self(x)
         loss = self.compute_loss(x, x_hat)
         self.log("test_loss", loss)
         bce = nn.BCELoss()(x_hat, x)
         self.log("val_bce", bce, sync_dist=True)
         self.update_metrics(x, x_hat)
+        self.reconstructed_vectors.append(x_hat.detach().cpu().numpy())
 
     def on_test_epoch_end(self):
         self.log(
@@ -182,12 +199,15 @@ class LinearAutoencoder(pl.LightningModule):
             self.column_wise_f1.compute(),
             sync_dist=True,
         )
-        self.log(
-            "val_column_wise_f1_per_column",
-            self.column_wise_f1_per_column.compute(),
-            sync_dist=True,
-        )
-
+        column_wise_f1 = self.column_wise_f1_per_column.compute()
+        for i, val in enumerate(column_wise_f1):
+            self.log(f"test_f1_{self.slogans[i]}", val, sync_dist=True)
+        
+        reconstructed_df = pd.DataFrame(np.concatenate(self.reconstructed_vectors, axis=0))
+        # Salva il DataFrame in un file CSV
+        reconstructed_df.to_csv('reconstructed_vectors.csv', index=False)
+        
+        
         self.perfect_reconstruction.reset()
         self.column_wise_accuracy.reset()
         self.column_wise_precision.reset()

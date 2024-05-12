@@ -8,7 +8,7 @@ from model_auto import LinearAutoencoder
 from sklearn.model_selection import train_test_split
 import torch
 import pandas as pd
-from utils_auto import plot_occurrences, create_df
+from utils_auto import create_df
 
 
 # Creazione del logger una sola volta
@@ -25,16 +25,20 @@ experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
 hyper_params = {
     "learning_rate": 1e-3,
     "batch_size": 64,
-    "epochs": 1,
+    "epochs": 30,
     "input_size": 87,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
+    "denoise": False,
+    "transofrm_type": "bitflip",
 }
 
 comet_logger.log_hyperparams(hyper_params)
 
 
-original_dataset = TIMCL("result_df_gt_2.parquet")
+original_dataset = TIMCL(
+    "result_df_gt_2.parquet", hyper_params["denoise"], hyper_params["transofrm_type"]
+)
 indexes = range(0, len(original_dataset))
 
 
@@ -102,7 +106,7 @@ test_loader = DataLoader(
 )
 
 
-autoencoder = LinearAutoencoder(hyper_params)
+autoencoder = LinearAutoencoder(hyper_params, original_dataset.slogan)
 
 trainer = pl.Trainer(
     max_epochs=hyper_params["epochs"],
