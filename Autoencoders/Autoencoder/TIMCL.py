@@ -37,8 +37,8 @@ class TIMCL(Dataset):
 
 
 if __name__ == "__main__":
-    data_path = "result_df_gt_2.parquet"
-    dataset = TIMCL(data_path)
+    data_path = "Dataset split/result_df_gt_2.parquet"
+    dataset = TIMCL(data_path, denoise=True, transofrm_type="bitflip")
     print(dataset.data)
     print(dataset.slogan)
     print(dataset[2])  # Stampa il tensore rappresentante la riga e l'ID del cluster
