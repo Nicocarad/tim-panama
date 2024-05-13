@@ -1,5 +1,5 @@
 slogan,occurrences,f1
-None,75161,
+None,75161,0.9999601244926453
 apparato isolato,26603,0.997191309928894
 signal degraded,21426,0.9999533295631408
 loss of signal los,14076,0.999964475631714
@@ -8,7 +8,7 @@ loss of frame lof,8703,1.0
 scheda guasta,7629,0.9996720552444458
 apparato disservito,6743,0.9997775554656982
 guasto matrice,6460,0.8510448932647705
-fermo totale apparato,6332,
+fermo totale apparato,6332,0.9992108941078186
 oproutgoing channel optical power out of range,4579,0.9564523100852966
 lof,3946,0.9997464418411256
 loss of pointer lop,3437,0.999272346496582
@@ -41,7 +41,7 @@ serversignalfailure och ssf,604,0.0
 ethernetlinkdown link down,578,0.0
 degrado performance segnale,507,0.0
 receiverfailure ethernet link down,463,0.0
-receiverfailure och internal receiver failure,434,
+receiverfailure och internal receiver failure,434,0.0
 ferf och bdi,428,0.0
 serversignalfailure specific problem non inviato da agent,408,0.0
 ferf remote defect indication,355,0.0
@@ -52,7 +52,7 @@ lossofwavelength och low,269,0.0
 sef intermittente sef,254,0.0
 losloss of signal,243,0.0
 payload type mismatch intermittente lo slm,238,0.0
-payload type mismatch payload type mismatch,228,
+payload type mismatch payload type mismatch,228,0.0
 loss of xpic signal,210,0.0
 loss of multiframe loss of multiframe,199,0.0
 loss of signal loss of signal,187,0.0
@@ -63,21 +63,21 @@ loss of signal och low,121,0.0
 loss of frame,108,0.0
 server signal failure egress odu och ssf,102,0.0
 eqpt sef,101,0.0
-loss of synchronization loss of synchronization,93,
+loss of synchronization loss of synchronization,93,0.0
 mpls tunnel rdi mpls tunnel rdi,83,0.0
 receivedpowerhigh low lpr,79,0.0
 ochcollisionchannel collision,60,0.0
 serversignalfailure ogpi internal receiver failure,58,0.0
 opttxlow reducedtransmitteroutputpower,50,0.0
 vlan megaco ko,42,0.0
-oproutgoing channel optical power out of range xexc,32,
+oproutgoing channel optical power out of range xexc,32,0.0
 loss of signal alos,28,0.0
 excessive ber excessive ber,24,0.0
 pwrsusp rxpower management suspended xexc xexc xexc,11,0.0
 canale di comunicazione interno down,9,0.0
 replaceablemodulemissing eqpt,8,0.0
 oproutgoing channel optical power out of range xexc ag,6,0.0
-nan,2,
+nan,2,0.0
 vc unequipped ho vc unequipped,1,0.0
 guasto bus di comunicazione,0,0.0
 cardinitcard initializing,0,0.0

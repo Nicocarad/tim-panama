@@ -34,19 +34,15 @@ class LinearAutoencoder(pl.LightningModule):
             nn.ReLU(),
             nn.Linear(64, 32),
             nn.ReLU(),
-            # nn.Linear(32, 16),
-            # nn.ReLU(),
         )
 
         # Definizione del decoder
         self.decoder = nn.Sequential(
-            # nn.Linear(16, 32),
-            # nn.ReLU(),
             nn.Linear(32, 64),
             nn.ReLU(),
             nn.Linear(64, self.input_size),
-            nn.Sigmoid(),  # Sigmoid per ottenere valori tra 0 e 1
-        )
+            nn.Sigmoid(),
+        ) 
 
         # Inizializzazione della metrica
         self.perfect_reconstruction = PerfectReconstruction()
