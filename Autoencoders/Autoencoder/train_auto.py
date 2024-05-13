@@ -16,7 +16,7 @@ from tqdm import tqdm
 comet_logger = CometLogger(
     api_key="knoxznRgLLK2INEJ9GIbmR7ww",
     project_name="TIM_thesis",
-    experiment_name="TIM autoencoder two layer 30epochs",
+    experiment_name="TIM autoencoder two layer 30epochs Denoise",
 )
 
 experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
@@ -26,11 +26,11 @@ experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
 hyper_params = {
     "learning_rate": 1e-3,
     "batch_size": 64,
-    "epochs": 20,
+    "epochs": 30,
     "input_size": 87,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
-    "denoise": False,
+    "denoise": True,
     "transofrm_type": "bitflip",
 }
 
@@ -69,7 +69,7 @@ train_loader = DataLoader(
     batch_size=hyper_params["batch_size"],
     num_workers=1,
     drop_last=True,
-    shuffle=True,
+    shuffle=False,
 )
 val_loader = DataLoader(
     val_dataset,

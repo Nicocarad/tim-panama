@@ -9,8 +9,7 @@ from metrics import (
     ColumnWiseF1,
     ColumnWiseF1PerColumn,
 )
-import numpy as np
-import pandas as pd
+
 
 
 class LinearAutoencoder(pl.LightningModule):
@@ -166,7 +165,7 @@ class LinearAutoencoder(pl.LightningModule):
         bce = nn.BCELoss()(x_hat, x)
         self.log("val_bce", bce, sync_dist=True)
         self.update_metrics(x, x_hat)
-        self.reconstructed_vectors.append(x_hat.detach().cpu().numpy())
+        
 
     def on_test_epoch_end(self):
         self.log(
