@@ -6,6 +6,7 @@ import numpy as np
 
 class TIMCL(Dataset):
     def __init__(self, data_path, denoise=None, transofrm_type=None):
+
         self.data = pd.read_parquet(data_path)
         self.cluster_ids = self.data.index  # Utilizza l'indice del DataFrame
         self.slogan = self.data.columns.tolist()
@@ -23,7 +24,7 @@ class TIMCL(Dataset):
             mask_cols = int(0.15 * len(item))
 
             mask_indices = np.random.choice(len(item), mask_cols, replace=False)
-            
+
             if self.transform_type == "bitflip":
                 masked_item[mask_indices] = 1 - masked_item[mask_indices]
             else:

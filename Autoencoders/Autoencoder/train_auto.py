@@ -5,10 +5,11 @@ from torch.utils.data import Subset, DataLoader
 from TIMCL import TIMCL
 import pytorch_lightning as pl
 from model_auto import LinearAutoencoder
-from sklearn.model_selection import train_test_split
+
 import torch
 import pandas as pd
-from utils_auto import create_df
+from utils_auto import split_and_save_indexes
+from tqdm import tqdm
 
 
 # Creazione del logger una sola volta
@@ -25,7 +26,7 @@ experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
 hyper_params = {
     "learning_rate": 1e-3,
     "batch_size": 64,
-    "epochs": 30,
+    "epochs": 20,
     "input_size": 87,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
@@ -42,42 +43,23 @@ original_dataset = TIMCL(
 indexes = range(0, len(original_dataset))
 
 
-train_indexes, temp_indexes = train_test_split(
-    indexes,
-    train_size=0.7,
-    random_state=42,
-    shuffle=True,
-)
+# split_and_save_indexes(indexes)
 
-val_indexes, test_indexes = train_test_split(
-    temp_indexes,
-    train_size=0.5,
-    random_state=42,
-    shuffle=True,
-)
+
+train_indexes = pd.read_csv("train_indexes.csv").values.flatten()
+val_indexes = pd.read_csv("val_indexes.csv").values.flatten()
+test_indexes = pd.read_csv("test_indexes.csv").values.flatten()
+
 
 # Creazione dei subset utilizzando il dataset originale
 train_dataset = Subset(original_dataset, train_indexes)
 val_dataset = Subset(original_dataset, val_indexes)
 test_dataset = Subset(original_dataset, test_indexes)
 
+
 print("Train dataset length: ", len(train_dataset))
 print("Val dataset length: ", len(val_dataset))
 print("Test dataset length: ", len(test_dataset))
-
-
-train_df = create_df(original_dataset, train_indexes)
-val_df = create_df(original_dataset, val_indexes)
-test_df = create_df(original_dataset, test_indexes)
-
-train_df.to_parquet("train_df.parquet")
-val_df.to_parquet("val_df.parquet")
-test_df.to_parquet("test_df.parquet")
-
-
-print("Train DataFrame shape: ", train_df.shape)
-print("Val DataFrame shape: ", val_df.shape)
-print("Test DataFrame shape: ", test_df.shape)
 
 
 torch.manual_seed(42)

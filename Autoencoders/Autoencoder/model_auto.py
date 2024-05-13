@@ -27,7 +27,6 @@ class LinearAutoencoder(pl.LightningModule):
         self.denoise = self.hyper_params["denoise"]
 
         self.slogans = slogans
-        self.reconstructed_vectors = []
 
         # Definizione dell'encoder
         self.encoder = nn.Sequential(
@@ -202,12 +201,7 @@ class LinearAutoencoder(pl.LightningModule):
         column_wise_f1 = self.column_wise_f1_per_column.compute()
         for i, val in enumerate(column_wise_f1):
             self.log(f"test_f1_{self.slogans[i]}", val, sync_dist=True)
-        
-        reconstructed_df = pd.DataFrame(np.concatenate(self.reconstructed_vectors, axis=0))
-        # Salva il DataFrame in un file CSV
-        reconstructed_df.to_csv('reconstructed_vectors.csv', index=False)
-        
-        
+
         self.perfect_reconstruction.reset()
         self.column_wise_accuracy.reset()
         self.column_wise_precision.reset()
