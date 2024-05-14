@@ -28,7 +28,7 @@ class TIMCL(Dataset):
             if self.transform_type == "bitflip":
                 masked_item[mask_indices] = 1 - masked_item[mask_indices]
             else:
-                masked_item[mask_indices] = 2
+                masked_item[mask_indices] = -1
 
         return item, masked_item, cluster_id
 
