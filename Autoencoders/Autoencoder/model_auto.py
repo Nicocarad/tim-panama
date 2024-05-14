@@ -11,7 +11,6 @@ from metrics import (
 )
 
 
-
 class LinearAutoencoder(pl.LightningModule):
     def __init__(self, hyper_params, slogans):
         super(LinearAutoencoder, self).__init__()
@@ -29,9 +28,7 @@ class LinearAutoencoder(pl.LightningModule):
 
         # Definizione dell'encoder
         self.encoder = nn.Sequential(
-            nn.Linear(self.input_size, 80),
-            nn.ReLU(),
-            nn.Linear(80, 64),
+            nn.Linear(self.input_size, 64),
             nn.ReLU(),
             nn.Linear(64, 32),
             nn.ReLU(),
@@ -41,11 +38,9 @@ class LinearAutoencoder(pl.LightningModule):
         self.decoder = nn.Sequential(
             nn.Linear(32, 64),
             nn.ReLU(),
-            nn.Linear(64, 80),
-            nn.ReLU(),
-            nn.Linear(80, self.input_size),
+            nn.Linear(64, self.input_size),
             nn.Sigmoid(),
-        ) 
+        )
 
         # Inizializzazione della metrica
         self.perfect_reconstruction = PerfectReconstruction()
@@ -169,7 +164,6 @@ class LinearAutoencoder(pl.LightningModule):
         bce = nn.BCELoss()(x_hat, x)
         self.log("val_bce", bce, sync_dist=True)
         self.update_metrics(x, x_hat)
-        
 
     def on_test_epoch_end(self):
         self.log(
