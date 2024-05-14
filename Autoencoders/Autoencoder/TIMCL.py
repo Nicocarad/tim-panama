@@ -5,7 +5,7 @@ import numpy as np
 
 
 class TIMCL(Dataset):
-    def __init__(self, data_path, denoise=None, transofrm_type=None):
+    def __init__(self, data_path,mode, denoise=None, transofrm_type=None):
 
         self.data = pd.read_parquet(data_path)
         self.cluster_ids = self.data.index  # Utilizza l'indice del DataFrame
