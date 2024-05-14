@@ -43,61 +43,61 @@ original_dataset = TIMCL(
 indexes = range(0, len(original_dataset))
 
 
-split_and_save_indexes(indexes)
+# split_and_save_indexes(indexes)
 
 
-# train_indexes = pd.read_csv("train_indexes.csv").values.flatten()
-# val_indexes = pd.read_csv("val_indexes.csv").values.flatten()
-# test_indexes = pd.read_csv("test_indexes.csv").values.flatten()
+train_indexes = pd.read_csv("train_indexes.csv").values.flatten()
+val_indexes = pd.read_csv("val_indexes.csv").values.flatten()
+test_indexes = pd.read_csv("test_indexes.csv").values.flatten()
 
 
-# # Creazione dei subset utilizzando il dataset originale
-# train_dataset = Subset(original_dataset, train_indexes)
-# val_dataset = Subset(original_dataset, val_indexes)
-# test_dataset = Subset(original_dataset, test_indexes)
+# Creazione dei subset utilizzando il dataset originale
+train_dataset = Subset(original_dataset, train_indexes)
+val_dataset = Subset(original_dataset, val_indexes)
+test_dataset = Subset(original_dataset, test_indexes)
 
 
-# print("Train dataset length: ", len(train_dataset))
-# print("Val dataset length: ", len(val_dataset))
-# print("Test dataset length: ", len(test_dataset))
+print("Train dataset length: ", len(train_dataset))
+print("Val dataset length: ", len(val_dataset))
+print("Test dataset length: ", len(test_dataset))
 
 
-# torch.manual_seed(42)
+torch.manual_seed(42)
 
-# train_loader = DataLoader(
-#     train_dataset,
-#     batch_size=hyper_params["batch_size"],
-#     num_workers=1,
-#     drop_last=True,
-#     shuffle=False,
-# )
-# val_loader = DataLoader(
-#     val_dataset,
-#     batch_size=hyper_params["batch_size"],
-#     num_workers=1,
-#     drop_last=True,
-#     shuffle=False,
-# )
+train_loader = DataLoader(
+    train_dataset,
+    batch_size=hyper_params["batch_size"],
+    num_workers=1,
+    drop_last=True,
+    shuffle=False,
+)
+val_loader = DataLoader(
+    val_dataset,
+    batch_size=hyper_params["batch_size"],
+    num_workers=1,
+    drop_last=True,
+    shuffle=False,
+)
 
-# test_loader = DataLoader(
-#     test_dataset,
-#     batch_size=hyper_params["batch_size"],
-#     num_workers=1,
-#     drop_last=True,
-#     shuffle=False,
-# )
-
-
-# autoencoder = LinearAutoencoder(hyper_params, original_dataset.slogan)
-
-# trainer = pl.Trainer(
-#     max_epochs=hyper_params["epochs"],
-#     logger=comet_logger,
-#     default_root_dir="Checkpoints/",
-# )
+test_loader = DataLoader(
+    test_dataset,
+    batch_size=hyper_params["batch_size"],
+    num_workers=1,
+    drop_last=True,
+    shuffle=False,
+)
 
 
-# trainer.fit(autoencoder, train_loader, val_dataloaders=val_loader)
+autoencoder = LinearAutoencoder(hyper_params, original_dataset.slogan)
+
+trainer = pl.Trainer(
+    max_epochs=hyper_params["epochs"],
+    logger=comet_logger,
+    default_root_dir="Checkpoints/",
+)
 
 
-# trainer.test(autoencoder, test_loader)
+trainer.fit(autoencoder, train_loader, val_dataloaders=val_loader)
+
+
+trainer.test(autoencoder, test_loader)
