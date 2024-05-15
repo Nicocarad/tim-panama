@@ -16,7 +16,7 @@ from tqdm import tqdm
 comet_logger = CometLogger(
     api_key="knoxznRgLLK2INEJ9GIbmR7ww",
     project_name="TIM_thesis",
-    experiment_name="TIM autoencoder two layer 30epochs denoise out-of-range",
+    experiment_name="TIM autoencoder two layer 30epochs denoise bitflip ",
 )
 
 experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
@@ -25,13 +25,13 @@ experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
 # Report multiple hyperparameters using a dictionary:
 hyper_params = {
     "learning_rate": 1e-3,
-    "batch_size": 64,
+    "batch_size": 16,
     "epochs": 30,
     "input_size": 114,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "denoise": True,
-    "transofrm_type": "out-of-range",
+    "transofrm_type": "bitflip",
 }
 
 comet_logger.log_hyperparams(hyper_params)
