@@ -20,17 +20,23 @@ experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
 
 # Report multiple hyperparameters using a dictionary:
 hyper_params = {
+    "learning_rate": 1e-3,
     "batch_size": 64,
     "epochs": 30,
     "input_size": 114,
     "cutting_threshold": 0.5,
+    "optimizer": "Adam",
+    "denoise": False,
+    "transofrm_type": "bitflip",
 }
 
-
-# Carica il modello da un checkpoint
-autoencoder = LinearAutoencoder.load_from_checkpoint("path/to/checkpoint.ckpt")
-
 original_dataset = TIMCL("result_df_gt_2.parquet", False, None)
+
+autoencoder = LinearAutoencoder.load_from_checkpoint(
+    "./epoch=29-step=283530.ckpt",
+    hyper_params=hyper_params,
+    slogans=original_dataset.slogan,
+)
 
 
 test_indexes = pd.read_csv("test_indexes.csv").values.flatten()
