@@ -89,10 +89,10 @@ class LinearAutoencoder(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, masked_x, _ = batch
         if self.denoise == True:
-            masked_x = masked_x.view(masked_x.size(0), -1)
+
             x_hat = self(masked_x)
         else:
-            x = x.view(x.size(0), -1)
+
             x_hat = self(x)
         loss = self.compute_loss(x, x_hat)
 
@@ -103,10 +103,10 @@ class LinearAutoencoder(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         x, masked_x, _ = batch
         if self.denoise == True:
-            masked_x = masked_x.view(masked_x.size(0), -1)
+
             x_hat = self(masked_x)
         else:
-            x = x.view(x.size(0), -1)
+
             x_hat = self(x)
         loss = self.compute_loss(x, x_hat)
         self.log("val_loss", loss, sync_dist=True)
@@ -154,10 +154,10 @@ class LinearAutoencoder(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         x, masked_x, _ = batch
         if self.denoise == True:
-            masked_x = masked_x.view(masked_x.size(0), -1)
+
             x_hat = self(masked_x)
         else:
-            x = x.view(x.size(0), -1)
+
             x_hat = self(x)
         loss = self.compute_loss(x, x_hat)
         self.log("test_loss", loss)

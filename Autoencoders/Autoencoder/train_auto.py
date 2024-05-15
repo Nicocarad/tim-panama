@@ -16,7 +16,7 @@ from tqdm import tqdm
 comet_logger = CometLogger(
     api_key="knoxznRgLLK2INEJ9GIbmR7ww",
     project_name="TIM_thesis",
-    experiment_name="TIM autoencoder two layer 30epochs denoise bitflip ",
+    experiment_name="TIM autoencoder two layer 30epochs standard ",
 )
 
 experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
@@ -25,12 +25,12 @@ experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
 # Report multiple hyperparameters using a dictionary:
 hyper_params = {
     "learning_rate": 1e-3,
-    "batch_size": 16,
+    "batch_size": 64,
     "epochs": 30,
     "input_size": 114,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
-    "denoise": True,
+    "denoise": False,
     "transofrm_type": "bitflip",
 }
 
@@ -54,8 +54,6 @@ test_indexes = pd.read_csv("test_indexes.csv").values.flatten()
 
 # Creazione dei subset utilizzando il dataset originale
 train_dataset = Subset(original_dataset, train_indexes)
-
-# original_dataset = TIMCL("result_df_gt_2.parquet") # Non applicare il denoise al validation e test
 val_dataset = Subset(original_dataset, val_indexes)
 test_dataset = Subset(original_dataset, test_indexes)
 
@@ -104,3 +102,5 @@ trainer.fit(autoencoder, train_loader, val_dataloaders=val_loader)
 
 
 trainer.test(autoencoder, test_loader)
+
+
