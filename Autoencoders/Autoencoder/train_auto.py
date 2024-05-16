@@ -5,18 +5,17 @@ from torch.utils.data import Subset, DataLoader
 from TIMCL import TIMCL
 import pytorch_lightning as pl
 from model_auto import LinearAutoencoder
-
 import torch
 import pandas as pd
 from utils_auto import split_and_save_indexes
-from tqdm import tqdm
+
 
 
 # Creazione del logger una sola volta
 comet_logger = CometLogger(
     api_key="knoxznRgLLK2INEJ9GIbmR7ww",
     project_name="TIM_thesis",
-    experiment_name="TIM autoencoder two layer 30epochs standard ",
+    experiment_name="TIM autoencoder two layer 30epochs denoise bitflip",
 )
 
 experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
@@ -30,7 +29,7 @@ hyper_params = {
     "input_size": 114,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
-    "denoise": False,
+    "denoise": True,
     "transofrm_type": "bitflip",
 }
 
@@ -102,5 +101,3 @@ trainer.fit(autoencoder, train_loader, val_dataloaders=val_loader)
 
 
 trainer.test(autoencoder, test_loader)
-
-
