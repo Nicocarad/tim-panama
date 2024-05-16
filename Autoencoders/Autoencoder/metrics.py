@@ -18,6 +18,7 @@ class PerfectReconstruction(torchmetrics.Metric):
     def update(self, preds, target):
 
         assert preds.shape == target.shape
+        
         # Aggiorna il conteggio delle previsioni perfette
         self.perfect += torch.sum(torch.all(preds == target, dim=1)).item()
         # Aggiorna il conteggio totale delle previsioni
@@ -25,8 +26,8 @@ class PerfectReconstruction(torchmetrics.Metric):
 
     def compute(self):
         # Stampa il numero di previsioni perfette e il totale delle previsioni
-        print(f"Perfect: {self.perfect}")
-        print(f"Total: {self.total}")
+        # print(f"Perfect: {self.perfect}")
+        # print(f"Total: {self.total}")
         # Calcola e restituisce l'accuracy come il rapporto tra le previsioni perfette e il totale delle previsioni
         return self.perfect / self.total
 
@@ -63,6 +64,7 @@ class BaseMetric(torchmetrics.Metric):
         self.false_positives += false_positives
         self.false_negatives += false_negatives
         self.true_negatives += true_negatives
+        
 
 
 class ColumnWiseAccuracy(BaseMetric):
@@ -74,12 +76,12 @@ class ColumnWiseAccuracy(BaseMetric):
     def compute(self):
         total = self.true_positives + self.false_positives + self.false_negatives + self.true_negatives
         correct = self.true_positives + self.true_negatives
-        print("True positives: ", self.true_positives)
-        print("False positives: ", self.false_positives)
-        print("False negatives: ", self.false_negatives)
-        print("True negatives: ", self.true_negatives)
-        print(f"Total: {total}")
-        print(f"Correct: {correct}")
+        # print("True positives: ", self.true_positives)
+        # print("False positives: ", self.false_positives)
+        # print("False negatives: ", self.false_negatives)
+        # print("True negatives: ", self.true_negatives)
+        # print(f"Total: {total}")
+        # print(f"Correct: {correct}")
         
         global_accuracy = torch.mean(
             torch.where(total > 0, correct / total, torch.zeros_like(total))
