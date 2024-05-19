@@ -7,15 +7,13 @@ import pytorch_lightning as pl
 from model_auto import LinearAutoencoder
 import torch
 import pandas as pd
-from utils_auto import split_and_save_indexes
-
 
 
 # Creazione del logger una sola volta
 comet_logger = CometLogger(
     api_key="knoxznRgLLK2INEJ9GIbmR7ww",
     project_name="TIM_thesis",
-    experiment_name="TIM autoencoder two layer 30epochs denoise bitflip",
+    experiment_name="TIM autoencoder two layer 30epochs standard",
 )
 
 experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
@@ -26,10 +24,10 @@ hyper_params = {
     "learning_rate": 1e-3,
     "batch_size": 64,
     "epochs": 30,
-    "input_size": 114,
+    "input_size": 113,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
-    "denoise": True,
+    "denoise": False,
     "transofrm_type": "bitflip",
 }
 
@@ -39,11 +37,6 @@ comet_logger.log_hyperparams(hyper_params)
 original_dataset = TIMCL(
     "result_df_gt_2.parquet", hyper_params["denoise"], hyper_params["transofrm_type"]
 )
-
-indexes = range(0, len(original_dataset))
-
-
-# split_and_save_indexes(indexes)
 
 
 train_indexes = pd.read_csv("train_indexes.csv").values.flatten()
