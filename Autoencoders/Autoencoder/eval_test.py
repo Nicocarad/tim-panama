@@ -13,7 +13,7 @@ import pandas as pd
 comet_logger = CometLogger(
     api_key="knoxznRgLLK2INEJ9GIbmR7ww",
     project_name="TIM_thesis",
-    experiment_name="TIM autoencoder evaluate test out_of_range",
+    experiment_name="TIM autoencoder evaluate test out",
 )
 
 experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
@@ -23,7 +23,7 @@ hyper_params = {
     "learning_rate": 1e-3,
     "batch_size": 64,
     "epochs": 30,
-    "input_size": 114,
+    "input_size": 113,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "denoise": False,
@@ -33,7 +33,7 @@ hyper_params = {
 original_dataset = TIMCL("result_df_gt_2.parquet", False, None)
 
 autoencoder = LinearAutoencoder.load_from_checkpoint(
-    "./epoch=29-step=141750.ckpt",
+    "./out.ckpt",
     hyper_params=hyper_params,
     slogans=original_dataset.slogan,
 )
