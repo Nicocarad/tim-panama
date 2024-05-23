@@ -3,17 +3,19 @@ import torch.optim as optim
 import pytorch_lightning as pl
 import torchmetrics
 
+
 class BinaryClassifier(pl.LightningModule):
-    def __init__(self, encoder, input_dim, learning_rate):
+    def __init__(self, encoder, input_dim, learning_rate, cutting_threshold):
         super(BinaryClassifier, self).__init__()
         self.encoder = encoder
         self.classifier = nn.Sequential(
-            nn.Linear(input_dim, 16),
-            nn.ReLU(),
-            nn.Linear(16, 1),
+            nn.Linear(input_dim, 64), 
+            nn.ReLU(), 
+            nn.Linear(64, 1), 
             nn.Sigmoid()
         )
         self.learning_rate = learning_rate
+        self.cutting_threshold = cutting_threshold
         self.criterion = nn.BCELoss()
         self.accuracy = torchmetrics.Accuracy()
         self.precision = torchmetrics.Precision()
@@ -35,6 +37,7 @@ class BinaryClassifier(pl.LightningModule):
         x, y = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
+        y_hat = y_hat > self.cutting_threshold
         self.log("val_loss", loss, on_step=True, on_epoch=False)
         self.accuracy(y_hat, y)
         self.precision(y_hat, y)
@@ -52,6 +55,7 @@ class BinaryClassifier(pl.LightningModule):
         x, y = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
+        y_hat = y_hat > self.cutting_threshold
         self.log("test_loss", loss, on_step=True, on_epoch=False)
         self.accuracy(y_hat, y)
         self.precision(y_hat, y)

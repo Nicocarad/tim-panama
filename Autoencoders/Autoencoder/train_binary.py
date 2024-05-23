@@ -92,7 +92,7 @@ encoder = autoencoder.encoder
 encoder = autoencoder.encoder
 
 # Configura e addestra il classificatore
-classifier = BinaryClassifier(encoder, input_dim=32)
+classifier = BinaryClassifier(encoder, input_dim=hyper_params["input_size"], learning_rate=hyper_params["learning_rate"], cutting_threshold=hyper_params["cutting_threshold"])
 trainer = pl.Trainer(max_epochs=10)
 trainer.fit(classifier, train_loader, test_loader)
 
