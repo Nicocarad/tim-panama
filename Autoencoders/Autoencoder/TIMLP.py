@@ -10,7 +10,6 @@ class TIMLP(Dataset):
         self.data = pd.read_parquet(data_path)
         self.cluster_ids = self.data.index  # Utilizza l'indice del DataFrame
         self.labels = pd.read_csv(label_path)
-        
         self.data = pd.merge(self.data,self.labels, on='cluster_id2', how='left')
         self.data = self.data.set_index('cluster_id2', verify_integrity=True)
        
