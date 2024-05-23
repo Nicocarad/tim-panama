@@ -4,6 +4,7 @@ import pytorch_lightning as pl
 import torchmetrics
 from sklearn.metrics import classification_report
 import numpy as np
+import torch
 
 
 class BinaryClassifier(pl.LightningModule):
@@ -12,18 +13,15 @@ class BinaryClassifier(pl.LightningModule):
         self.test_outputs = []
         self.encoder = encoder
         self.classifier = nn.Sequential(
-            nn.Linear(input_dim, 64), 
-            nn.ReLU(), 
-            nn.Linear(64, 1), 
-            nn.Sigmoid()
+            nn.Linear(input_dim, 64), nn.ReLU(), nn.Linear(64, 1), nn.Sigmoid()
         )
         self.learning_rate = learning_rate
         self.cutting_threshold = cutting_threshold
         self.criterion = nn.BCELoss()
-        self.accuracy = torchmetrics.Accuracy(task="binary",average='none')
-        self.precision = torchmetrics.Precision(task="binary",average='none')
-        self.recall = torchmetrics.Recall(task="binary",average='none')
-        self.f1 = torchmetrics.F1Score(task="binary",average='none')
+        self.accuracy = torchmetrics.Accuracy(task="binary", average="none")
+        self.precision = torchmetrics.Precision(task="binary", average="none")
+        self.recall = torchmetrics.Recall(task="binary", average="none")
+        self.f1 = torchmetrics.F1Score(task="binary", average="none")
 
     def forward(self, x):
         encoded = self.encoder(x)
@@ -75,8 +73,8 @@ class BinaryClassifier(pl.LightningModule):
         self.log("test_precision", self.precision.compute())
         self.log("test_recall", self.recall.compute())
         self.log("test_f1", self.f1.compute())
-        y = np.concatenate([x['y'] for x in self.test_outputs])
-        y_hat = np.concatenate([x['y_hat'] for x in self.test_outputs])
+        y = np.concatenate([x["y"] for x in self.test_outputs])
+        y_hat = np.concatenate([x["y_hat"] for x in self.test_outputs])
         report = classification_report(y, y_hat, output_dict=True)
         self.log("test_acc", report["accuracy"])
         self.log("test_precision_0", report["0"]["precision"])
