@@ -25,9 +25,23 @@ experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
 hyper_params = {
     "input_size": 32,
     "batch_size": 8,
+    "epochs": 30,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "learning_rate": 0.001,
+}
+
+comet_logger.log_hyperparams(hyper_params)
+
+hyper_params_auto = {
+    "learning_rate": 1e-3,
+    "batch_size": 64,
+    "epochs": 30,
+    "input_size": 113,
+    "cutting_threshold": 0.5,
+    "optimizer": "Adam",
+    "denoise": False,
+    "transofrm_type": "out-of-range",
 }
 
 
@@ -80,9 +94,7 @@ test_loader = DataLoader(
 
 
 autoencoder = LinearAutoencoder.load_from_checkpoint(
-    "./model_30epochs.ckpt",
-    hyper_params=hyper_params,
-    slogans=original_dataset.slogan,
+    "./model_30epochs.ckpt", hyper_params=hyper_params_auto, slogans=None
 )
 
 # Estrai l'encoder dal modello addestrato
@@ -92,8 +104,17 @@ encoder = autoencoder.encoder
 encoder = autoencoder.encoder
 
 # Configura e addestra il classificatore
-classifier = BinaryClassifier(encoder, input_dim=hyper_params["input_size"], learning_rate=hyper_params["learning_rate"], cutting_threshold=hyper_params["cutting_threshold"])
-trainer = pl.Trainer(max_epochs=10)
+classifier = BinaryClassifier(
+    encoder,
+    input_dim=hyper_params["input_size"],
+    learning_rate=hyper_params["learning_rate"],
+    cutting_threshold=hyper_params["cutting_threshold"],
+)
+trainer = pl.Trainer(
+    max_epochs=hyper_params["epochs"],
+    logger=comet_logger,
+    default_root_dir="Checkpoints/",
+)
 trainer.fit(classifier, train_loader, test_loader)
 
 # Valuta il classificatore

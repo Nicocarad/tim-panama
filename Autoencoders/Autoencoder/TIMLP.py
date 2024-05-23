@@ -12,6 +12,7 @@ class TIMLP(Dataset):
         self.labels = pd.read_csv(label_path)
         self.data = pd.merge(self.data,self.labels, on='cluster_id2', how='left')
         self.data = self.data.set_index('cluster_id2', verify_integrity=True)
+        self.data.iloc[:, -1] = self.data.iloc[:, -1].astype(int)  # Converti l'ultima colonna (le etichette) in interi
        
 
     def __getitem__(self, idx):
@@ -19,7 +20,7 @@ class TIMLP(Dataset):
         item = self.data.iloc[idx, :-1].dropna().astype(float).values  # estrae tutte le colonne tranne l'ultima
         item = torch.tensor(item, dtype=torch.float32)
         label = self.data.iloc[idx, -1]  # estrae l'ultima colonna come label
-        label = torch.tensor(label, dtype=torch.int64) if pd.notnull(label) else torch.tensor(0, dtype=torch.int64)
+        # label = torch.tensor(label, dtype=torch.int64) if pd.notnull(label) else torch.tensor(0, dtype=torch.int64)
         cluster_id = f"cluster_id2={self.cluster_ids[idx]}"
 
         return item, label, cluster_id
