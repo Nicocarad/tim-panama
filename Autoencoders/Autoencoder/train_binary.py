@@ -2,7 +2,7 @@ import comet_ml
 from comet_ml import Experiment
 from pytorch_lightning.loggers import CometLogger
 from torch.utils.data import Subset, DataLoader
-from TIMCL import TIMCL
+from TIMLP import TIMLP
 import pytorch_lightning as pl
 from model_auto import LinearAutoencoder
 import torch
@@ -23,16 +23,18 @@ experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
 
 # Configura l'autoencoder
 hyper_params = {
-    "input_size": 50,
-    "batch_size": 32,
+    "input_size": 32,
+    "batch_size": 8,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "learning_rate": 0.001,
-    "denoise": False,
 }
 
 
-original_dataset = TIMCL("result_df_gt_2.parquet", hyper_params["denoise"], None)
+original_dataset = TIMLP(
+    "result_df_gt_2_lavoriprogrammati.parquet",
+    "20230101-20240101_real_time_clusters_filtered_guasto_cavo.csv",
+)
 
 
 train_indexes = pd.read_csv("train_indexes_lp.csv").values.flatten()
