@@ -8,7 +8,7 @@ import torch
 
 
 class BinaryClassifier(pl.LightningModule):
-    def __init__(self, encoder, input_dim, learning_rate, cutting_threshold):
+    def __init__(self, encoder, input_dim, learning_rate, cutting_threshold, kfold=False):
         super(BinaryClassifier, self).__init__()
         self.test_outputs = []
         self.encoder = encoder
@@ -22,6 +22,11 @@ class BinaryClassifier(pl.LightningModule):
         self.precision = torchmetrics.Precision(task="binary", average="none")
         self.recall = torchmetrics.Recall(task="binary", average="none")
         self.f1 = torchmetrics.F1Score(task="binary", average="none")
+        
+        self.fold_results = []
+        self.kfold = kfold
+
+
 
     def forward(self, x):
         encoded = self.encoder(x)
@@ -49,10 +54,31 @@ class BinaryClassifier(pl.LightningModule):
         return loss
 
     def on_validation_epoch_end(self):
-        self.log("val_acc", self.accuracy.compute())
-        self.log("val_precision", self.precision.compute())
-        self.log("val_recall", self.recall.compute())
-        self.log("val_f1", self.f1.compute())
+        
+        
+        if self.kfold == True:
+            acc = self.accuracy.compute()
+            precision = self.precision.compute()
+            recall = self.recall.compute()
+            f1 = self.f1.compute()
+
+            
+            self.fold_results.append({
+                "accuracy": acc,
+                "precision": precision,
+                "recall": recall,
+                "f1": f1,
+            })
+
+            self.log("val_acc", acc)
+            self.log("val_precision", precision)
+            self.log("val_recall", recall)
+            self.log("val_f1", f1)
+        else:
+            self.log("val_acc", self.accuracy.compute())
+            self.log("val_precision", self.precision.compute())
+            self.log("val_recall", self.recall.compute())
+            self.log("val_f1", self.f1.compute())
 
     def test_step(self, batch, batch_idx):
         x, y, _ = batch
@@ -89,3 +115,15 @@ class BinaryClassifier(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = optim.Adam(self.classifier.parameters(), lr=self.learning_rate)
         return optimizer
+
+
+    def compute_average_results(self):
+        # Calcola la media dei risultati di tutti i fold
+        average_results = {
+            "accuracy": sum(result["accuracy"] for result in self.fold_results) / len(self.fold_results),
+            "precision": sum(result["precision"] for result in self.fold_results) / len(self.fold_results),
+            "recall": sum(result["recall"] for result in self.fold_results) / len(self.fold_results),
+            "f1": sum(result["f1"] for result in self.fold_results) / len(self.fold_results),
+        }
+
+        return average_results
