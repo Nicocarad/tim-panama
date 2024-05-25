@@ -8,7 +8,7 @@ import torch
 
 
 class BinaryClassifier(pl.LightningModule):
-    def __init__(self, encoder, input_dim, learning_rate, cutting_threshold, kfold=False):
+    def __init__(self, encoder, input_dim, learning_rate, cutting_threshold):
         super(BinaryClassifier, self).__init__()
         self.test_outputs = []
         self.encoder = encoder
@@ -23,10 +23,8 @@ class BinaryClassifier(pl.LightningModule):
         self.recall = torchmetrics.Recall(task="binary", average="none")
         self.f1 = torchmetrics.F1Score(task="binary", average="none")
         
-        self.fold_results = []
-        self.kfold = kfold
-
-
+        self.test_outputs = []
+        self.test_results = {}
 
     def forward(self, x):
         encoded = self.encoder(x)
@@ -54,31 +52,11 @@ class BinaryClassifier(pl.LightningModule):
         return loss
 
     def on_validation_epoch_end(self):
-        
-        
-        if self.kfold == True:
-            acc = self.accuracy.compute()
-            precision = self.precision.compute()
-            recall = self.recall.compute()
-            f1 = self.f1.compute()
 
-            
-            self.fold_results.append({
-                "accuracy": acc,
-                "precision": precision,
-                "recall": recall,
-                "f1": f1,
-            })
-
-            self.log("val_acc", acc)
-            self.log("val_precision", precision)
-            self.log("val_recall", recall)
-            self.log("val_f1", f1)
-        else:
-            self.log("val_acc", self.accuracy.compute())
-            self.log("val_precision", self.precision.compute())
-            self.log("val_recall", self.recall.compute())
-            self.log("val_f1", self.f1.compute())
+        self.log("val_acc", self.accuracy.compute())
+        self.log("val_precision", self.precision.compute())
+        self.log("val_recall", self.recall.compute())
+        self.log("val_f1", self.f1.compute())
 
     def test_step(self, batch, batch_idx):
         x, y, _ = batch
@@ -95,13 +73,19 @@ class BinaryClassifier(pl.LightningModule):
         return loss
 
     def on_test_epoch_end(self):
-        self.log("test_acc", self.accuracy.compute())
-        self.log("test_precision", self.precision.compute())
-        self.log("test_recall", self.recall.compute())
-        self.log("test_f1", self.f1.compute())
+        acc = self.accuracy.compute()
+        precision = self.precision.compute()
+        recall = self.recall.compute()
+        f1 = self.f1.compute()
         y = np.concatenate([x["y"] for x in self.test_outputs])
         y_hat = np.concatenate([x["y_hat"] for x in self.test_outputs])
         report = classification_report(y, y_hat, output_dict=True)
+
+        # Log metrics
+        self.log("test_acc", acc)
+        self.log("test_precision", precision)
+        self.log("test_recall", recall)
+        self.log("test_f1", f1)
         self.log("test_acc", report["accuracy"])
         self.log("test_precision_0", report["0"]["precision"])
         self.log("test_recall_0", report["0"]["recall"])
@@ -109,21 +93,19 @@ class BinaryClassifier(pl.LightningModule):
         self.log("test_precision_1", report["1"]["precision"])
         self.log("test_recall_1", report["1"]["recall"])
         self.log("test_f1_1", report["1"]["f1-score"])
-        print(self.test_outputs)
-        self.test_outputs = []  # Reset for the next test run
+
+        # Reset for the next test run
+        self.test_outputs = []
+
+        # Save metrics as an attribute
+        self.test_results = {
+            "accuracy": acc,
+            "precision": precision,
+            "recall": recall,
+            "f1": f1,
+            "classification_report": report,
+        }
 
     def configure_optimizers(self):
         optimizer = optim.Adam(self.classifier.parameters(), lr=self.learning_rate)
         return optimizer
-
-
-    def compute_average_results(self):
-        # Calcola la media dei risultati di tutti i fold
-        average_results = {
-            "accuracy": sum(result["accuracy"] for result in self.fold_results) / len(self.fold_results),
-            "precision": sum(result["precision"] for result in self.fold_results) / len(self.fold_results),
-            "recall": sum(result["recall"] for result in self.fold_results) / len(self.fold_results),
-            "f1": sum(result["f1"] for result in self.fold_results) / len(self.fold_results),
-        }
-
-        return average_results

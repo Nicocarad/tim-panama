@@ -46,6 +46,18 @@ hyper_params_auto = {
 }
 
 
+test_results = {
+    "accuracy": 0,
+    "precision": 0,
+    "recall": 0,
+    "f1": 0,
+    "classification_report": {
+        "0": {"precision": 0, "recall": 0, "f1-score": 0},
+        "1": {"precision": 0, "recall": 0, "f1-score": 0},
+    },
+}
+
+
 torch.manual_seed(42)
 
 
@@ -62,16 +74,8 @@ original_dataset = TIMLP(
 )
 
 # Creazione dell'oggetto KFold
-kf = KFold(n_splits=5)
+kf = KFold(n_splits=2)
 
-# Configura e addestra il classificatore
-classifier = BinaryClassifier(
-        encoder,
-        input_dim=hyper_params["input_size"],
-        learning_rate=hyper_params["learning_rate"],
-        cutting_threshold=hyper_params["cutting_threshold"],
-        kfold=True,
-    )
 
 # Applicazione della cross-validation K-Fold
 for train_indexes, test_indexes in kf.split(original_dataset):
@@ -95,15 +99,55 @@ for train_indexes, test_indexes in kf.split(original_dataset):
         shuffle=False,
     )
 
-    
+    # Configura e addestra il classificatore
+    classifier = BinaryClassifier(
+        encoder,
+        input_dim=hyper_params["input_size"],
+        learning_rate=hyper_params["learning_rate"],
+        cutting_threshold=hyper_params["cutting_threshold"],
+    )
+
     trainer = pl.Trainer(
         max_epochs=hyper_params["epochs"],
         logger=comet_logger,
         default_root_dir="Checkpoints/",
     )
+
     trainer.fit(classifier, train_loader, test_loader)
     
-results = classifier.compute_average_results()
-print(results)
-
+    trainer.test(classifier, test_loader)
     
+    # Aggiungi i risultati del test ai risultati totali
+    test_results["accuracy"] += classifier.test_results["accuracy"]
+    test_results["precision"] += classifier.test_results["precision"]
+    test_results["recall"] += classifier.test_results["recall"]
+    test_results["f1"] += classifier.test_results["f1"]
+    test_results["classification_report"]["0"]["precision"] += classifier.test_results["classification_report"]["0"]["precision"]
+    test_results["classification_report"]["0"]["recall"] += classifier.test_results["classification_report"]["0"]["recall"]
+    test_results["classification_report"]["0"]["f1-score"] += classifier.test_results["classification_report"]["0"]["f1-score"]
+    test_results["classification_report"]["1"]["precision"] += classifier.test_results["classification_report"]["1"]["precision"]
+    test_results["classification_report"]["1"]["recall"] += classifier.test_results["classification_report"]["1"]["recall"]
+    test_results["classification_report"]["1"]["f1-score"] += classifier.test_results["classification_report"]["1"]["f1-score"]
+
+# Calcola la media dei risultati
+average_results = {
+    "accuracy": test_results["accuracy"] / kf.get_n_splits(),
+    "precision": test_results["precision"] / kf.get_n_splits(),
+    "recall": test_results["recall"] / kf.get_n_splits(),
+    "f1": test_results["f1"] / kf.get_n_splits(),
+    "classification_report": {
+        "0": {
+            "precision": test_results["classification_report"]["0"]["precision"] / kf.get_n_splits(),
+            "recall": test_results["classification_report"]["0"]["recall"] / kf.get_n_splits(),
+            "f1-score": test_results["classification_report"]["0"]["f1-score"] / kf.get_n_splits(),
+        },
+        "1": {
+            "precision": test_results["classification_report"]["1"]["precision"] / kf.get_n_splits(),
+            "recall": test_results["classification_report"]["1"]["recall"] / kf.get_n_splits(),
+            "f1-score": test_results["classification_report"]["1"]["f1-score"] / kf.get_n_splits(),
+        },
+    },
+}
+
+print(average_results)
+
