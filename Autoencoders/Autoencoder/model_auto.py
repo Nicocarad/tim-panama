@@ -28,7 +28,9 @@ class LinearAutoencoder(pl.LightningModule):
 
         # Definizione dell'encoder
         self.encoder = nn.Sequential(
-            nn.Linear(self.input_size, 64),
+            nn.Linear(self.input_size, 128),
+            nn.ReLU(),
+            nn.Linear(128, 64),
             nn.ReLU(),
             nn.Linear(64, 32),
             nn.ReLU(),
@@ -38,7 +40,9 @@ class LinearAutoencoder(pl.LightningModule):
         self.decoder = nn.Sequential(
             nn.Linear(32, 64),
             nn.ReLU(),
-            nn.Linear(64, self.input_size),
+            nn.Linear(64, 128),
+            nn.ReLU(),
+            nn.Linear(128, self.input_size),
             nn.Sigmoid(),
         )
 
