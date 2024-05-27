@@ -46,7 +46,7 @@ hyper_params_auto = {
 
 
 original_dataset = TIMLP(
-    "result_df_gt_2_lavoriprogrammati.parquet",
+    "result_df_gt_2_lavoriprogrammati_642.parquet",
     "20230101-20240101_real_time_clusters_filtered_guasto_cavo.csv",
 )
 

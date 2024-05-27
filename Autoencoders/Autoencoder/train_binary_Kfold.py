@@ -38,7 +38,7 @@ hyper_params_auto = {
     "learning_rate": 1e-3,
     "batch_size": 64,
     "epochs": 30,
-    "input_size": 113,
+    "input_size": 642,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "denoise": False,
@@ -62,26 +62,28 @@ torch.manual_seed(42)
 
 
 autoencoder = LinearAutoencoder.load_from_checkpoint(
-    "./model_30epochs.ckpt", hyper_params=hyper_params_auto, slogans=None
+    "./model_30epochs_642.ckpt", hyper_params=hyper_params_auto, slogans=None
 )
 
 # Estrai l'encoder dal modello addestrato
 encoder = autoencoder.encoder
 # Creazione del dataset
 original_dataset = TIMLP(
-    "result_df_gt_2_lavoriprogrammati.parquet",
+    "result_df_gt_2_lavoriprogrammati_642.parquet",
     "20230101-20240101_real_time_clusters_filtered_guasto_cavo.csv",
 )
 
 # Creazione dell'oggetto KFold
-kf = KFold(n_splits=2)
-
+kf = KFold(n_splits=5)
+print("Dataset Len ", len(original_dataset))
 
 # Applicazione della cross-validation K-Fold
 for train_indexes, test_indexes in kf.split(original_dataset):
     # Creazione dei subset utilizzando il dataset originale
     train_dataset = Subset(original_dataset, train_indexes)
     test_dataset = Subset(original_dataset, test_indexes)
+    print("Train dataset length: ", len(train_dataset))
+    print("Test dataset length: ", len(test_dataset))
 
     # Creazione dei DataLoader
     train_loader = DataLoader(
