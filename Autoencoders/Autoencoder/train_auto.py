@@ -22,8 +22,8 @@ experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
 # Report multiple hyperparameters using a dictionary:
 hyper_params = {
     "learning_rate": 1e-3,
-    "batch_size": 64,
-    "epochs": 30,
+    "batch_size": 16,
+    "epochs": 40,
     "input_size": 642,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
