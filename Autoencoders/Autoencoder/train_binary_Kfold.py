@@ -38,7 +38,7 @@ hyper_params_auto = {
     "learning_rate": 1e-3,
     "batch_size": 64,
     "epochs": 30,
-    "input_size": 642,
+    "input_size": 113,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "denoise": False,
@@ -62,14 +62,14 @@ torch.manual_seed(42)
 
 
 autoencoder = LinearAutoencoder.load_from_checkpoint(
-    "./model_30epochs_642.ckpt", hyper_params=hyper_params_auto, slogans=None
+    "./model_30epochs.ckpt", hyper_params=hyper_params_auto, slogans=None
 )
 
 # Estrai l'encoder dal modello addestrato
 encoder = autoencoder.encoder
 # Creazione del dataset
 original_dataset = TIMLP(
-    "result_df_gt_2_lavoriprogrammati_642.parquet",
+    "result_df_gt_2_lavoriprogrammati.parquet",
     "20230101-20240101_real_time_clusters_filtered_guasto_cavo.csv",
 )
 
