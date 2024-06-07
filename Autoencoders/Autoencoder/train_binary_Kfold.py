@@ -38,7 +38,7 @@ hyper_params_auto = {
     "learning_rate": 1e-3,
     "batch_size": 64,
     "epochs": 30,
-    "input_size": 113,
+    "input_size": 1755,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "denoise": False,
@@ -62,14 +62,14 @@ torch.manual_seed(42)
 
 
 autoencoder = LinearAutoencoder.load_from_checkpoint(
-    "./model_30epochs.ckpt", hyper_params=hyper_params_auto, slogans=None
+    "./model_30epochs_1755.ckpt", hyper_params=hyper_params_auto, slogans=None
 )
 
 # Estrai l'encoder dal modello addestrato
 encoder = autoencoder.encoder
 # Creazione del dataset
 original_dataset = TIMLP(
-    "result_df_gt_2_lavoriprogrammati.parquet",
+    "result_df_gt_2_lavoriprogrammati_1755.parquet",
     "20230101-20240101_real_time_clusters_filtered_guasto_cavo.csv",
 )
 
@@ -116,20 +116,32 @@ for train_indexes, test_indexes in kf.split(original_dataset):
     )
 
     trainer.fit(classifier, train_loader, test_loader)
-    
+
     trainer.test(classifier, test_loader)
-    
+
     # Aggiungi i risultati del test ai risultati totali
     test_results["accuracy"] += classifier.test_results["accuracy"]
     test_results["precision"] += classifier.test_results["precision"]
     test_results["recall"] += classifier.test_results["recall"]
     test_results["f1"] += classifier.test_results["f1"]
-    test_results["classification_report"]["0"]["precision"] += classifier.test_results["classification_report"]["0"]["precision"]
-    test_results["classification_report"]["0"]["recall"] += classifier.test_results["classification_report"]["0"]["recall"]
-    test_results["classification_report"]["0"]["f1-score"] += classifier.test_results["classification_report"]["0"]["f1-score"]
-    test_results["classification_report"]["1"]["precision"] += classifier.test_results["classification_report"]["1"]["precision"]
-    test_results["classification_report"]["1"]["recall"] += classifier.test_results["classification_report"]["1"]["recall"]
-    test_results["classification_report"]["1"]["f1-score"] += classifier.test_results["classification_report"]["1"]["f1-score"]
+    test_results["classification_report"]["0"]["precision"] += classifier.test_results[
+        "classification_report"
+    ]["0"]["precision"]
+    test_results["classification_report"]["0"]["recall"] += classifier.test_results[
+        "classification_report"
+    ]["0"]["recall"]
+    test_results["classification_report"]["0"]["f1-score"] += classifier.test_results[
+        "classification_report"
+    ]["0"]["f1-score"]
+    test_results["classification_report"]["1"]["precision"] += classifier.test_results[
+        "classification_report"
+    ]["1"]["precision"]
+    test_results["classification_report"]["1"]["recall"] += classifier.test_results[
+        "classification_report"
+    ]["1"]["recall"]
+    test_results["classification_report"]["1"]["f1-score"] += classifier.test_results[
+        "classification_report"
+    ]["1"]["f1-score"]
 
 # Calcola la media dei risultati
 average_results = {
@@ -139,17 +151,22 @@ average_results = {
     "f1": test_results["f1"] / kf.get_n_splits(),
     "classification_report": {
         "0": {
-            "precision": test_results["classification_report"]["0"]["precision"] / kf.get_n_splits(),
-            "recall": test_results["classification_report"]["0"]["recall"] / kf.get_n_splits(),
-            "f1-score": test_results["classification_report"]["0"]["f1-score"] / kf.get_n_splits(),
+            "precision": test_results["classification_report"]["0"]["precision"]
+            / kf.get_n_splits(),
+            "recall": test_results["classification_report"]["0"]["recall"]
+            / kf.get_n_splits(),
+            "f1-score": test_results["classification_report"]["0"]["f1-score"]
+            / kf.get_n_splits(),
         },
         "1": {
-            "precision": test_results["classification_report"]["1"]["precision"] / kf.get_n_splits(),
-            "recall": test_results["classification_report"]["1"]["recall"] / kf.get_n_splits(),
-            "f1-score": test_results["classification_report"]["1"]["f1-score"] / kf.get_n_splits(),
+            "precision": test_results["classification_report"]["1"]["precision"]
+            / kf.get_n_splits(),
+            "recall": test_results["classification_report"]["1"]["recall"]
+            / kf.get_n_splits(),
+            "f1-score": test_results["classification_report"]["1"]["f1-score"]
+            / kf.get_n_splits(),
         },
     },
 }
 
 print(average_results)
-

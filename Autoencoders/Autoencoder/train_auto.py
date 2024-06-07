@@ -13,7 +13,7 @@ import pandas as pd
 comet_logger = CometLogger(
     api_key="knoxznRgLLK2INEJ9GIbmR7ww",
     project_name="TIM_thesis",
-    experiment_name="TIM autoencoder two layer 30epochs 642 ",
+    experiment_name="TIM autoencoder two layer 30epochs 1755 ",
 )
 
 experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
@@ -24,7 +24,7 @@ hyper_params = {
     "learning_rate": 1e-3,
     "batch_size": 64,
     "epochs": 30,
-    "input_size": 642,
+    "input_size": 1755,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "denoise": False,
@@ -35,13 +35,13 @@ comet_logger.log_hyperparams(hyper_params)
 
 
 original_dataset = TIMCL(
-    "result_df_gt_2_ne_type.parquet", hyper_params["denoise"], hyper_params["transofrm_type"]
+    "result_df_gt_2_ne_type_link.parquet", hyper_params["denoise"], hyper_params["transofrm_type"]
 )
 
 
-train_indexes = pd.read_csv("train_indexes.csv").values.flatten()
-val_indexes = pd.read_csv("val_indexes.csv").values.flatten()
-test_indexes = pd.read_csv("test_indexes.csv").values.flatten()
+train_indexes = pd.read_csv("train_indexes_link.csv").values.flatten()
+val_indexes = pd.read_csv("val_indexes_link.csv").values.flatten()
+test_indexes = pd.read_csv("test_indexes_link.csv").values.flatten()
 
 
 # Creazione dei subset utilizzando il dataset originale
