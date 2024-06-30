@@ -7,6 +7,10 @@ import pytorch_lightning as pl
 from model_auto import LinearAutoencoder
 import torch
 import pandas as pd
+from pytorch_lightning import Trainer
+from pytorch_lightning.callbacks import EarlyStopping
+
+
 
 
 # Creazione del logger una sola volta
@@ -35,7 +39,9 @@ comet_logger.log_hyperparams(hyper_params)
 
 
 original_dataset = TIMCL(
-    "result_df_gt_2_ne_type_link.parquet", hyper_params["denoise"], hyper_params["transofrm_type"]
+    "result_df_gt_2_ne_type_1755.parquet",
+    hyper_params["denoise"],
+    hyper_params["transofrm_type"],
 )
 
 
@@ -83,11 +89,20 @@ test_loader = DataLoader(
 
 autoencoder = LinearAutoencoder(hyper_params, original_dataset.slogan)
 
+
+early_stop_callback = EarlyStopping(
+    monitor="val_column_wise_f1", min_delta=0.000, patience=3, verbose=False, mode="max"
+)
+
+
 trainer = pl.Trainer(
     max_epochs=hyper_params["epochs"],
+    callbacks=[early_stop_callback],
     logger=comet_logger,
     default_root_dir="Checkpoints/",
 )
+
+
 
 
 trainer.fit(autoencoder, train_loader, val_dataloaders=val_loader)

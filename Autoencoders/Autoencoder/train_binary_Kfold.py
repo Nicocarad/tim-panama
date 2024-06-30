@@ -25,8 +25,8 @@ experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
 # Configura l'autoencoder
 hyper_params = {
     "input_size": 32,
-    "batch_size": 8,
-    "epochs": 30,
+    "batch_size": 64,
+    "epochs": 35,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "learning_rate": 0.001,
@@ -47,14 +47,11 @@ hyper_params_auto = {
 
 
 test_results = {
-    "accuracy": 0,
-    "precision": 0,
-    "recall": 0,
-    "f1": 0,
     "classification_report": {
+        "accuracy": 0,
         "0": {"precision": 0, "recall": 0, "f1-score": 0},
         "1": {"precision": 0, "recall": 0, "f1-score": 0},
-    },
+    }
 }
 
 
@@ -62,7 +59,7 @@ torch.manual_seed(42)
 
 
 autoencoder = LinearAutoencoder.load_from_checkpoint(
-    "./model_30epochs_1755.ckpt", hyper_params=hyper_params_auto, slogans=None
+    "./model_30epochs_1755_new.ckpt", hyper_params=hyper_params_auto, slogans=None
 )
 
 # Estrai l'encoder dal modello addestrato
@@ -74,7 +71,7 @@ original_dataset = TIMLP(
 )
 
 # Creazione dell'oggetto KFold
-kf = KFold(n_splits=5)
+kf = KFold(n_splits=2)
 print("Dataset Len ", len(original_dataset))
 
 # Applicazione della cross-validation K-Fold
@@ -120,10 +117,9 @@ for train_indexes, test_indexes in kf.split(original_dataset):
     trainer.test(classifier, test_loader)
 
     # Aggiungi i risultati del test ai risultati totali
-    test_results["accuracy"] += classifier.test_results["accuracy"]
-    test_results["precision"] += classifier.test_results["precision"]
-    test_results["recall"] += classifier.test_results["recall"]
-    test_results["f1"] += classifier.test_results["f1"]
+    test_results["classification_report"]["accuracy"] += classifier.test_results[
+        "classification_report"
+    ]["accuracy"]
     test_results["classification_report"]["0"]["precision"] += classifier.test_results[
         "classification_report"
     ]["0"]["precision"]
@@ -145,11 +141,8 @@ for train_indexes, test_indexes in kf.split(original_dataset):
 
 # Calcola la media dei risultati
 average_results = {
-    "accuracy": test_results["accuracy"] / kf.get_n_splits(),
-    "precision": test_results["precision"] / kf.get_n_splits(),
-    "recall": test_results["recall"] / kf.get_n_splits(),
-    "f1": test_results["f1"] / kf.get_n_splits(),
     "classification_report": {
+        "accuracy": test_results["classification_report"]["accuracy"],
         "0": {
             "precision": test_results["classification_report"]["0"]["precision"]
             / kf.get_n_splits(),

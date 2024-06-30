@@ -13,18 +13,22 @@ class BinaryClassifier(pl.LightningModule):
         self.test_outputs = []
         self.encoder = encoder
         self.classifier = nn.Sequential(
-            nn.Linear(input_dim, 64), nn.ReLU(), nn.Linear(64, 1), nn.Sigmoid()
+            nn.Linear(input_dim, 64),
+            nn.BatchNorm1d(64),
+            nn.ReLU(),
+            nn.Linear(64, 1),
+            nn.Sigmoid(),
         )
         self.learning_rate = learning_rate
         self.cutting_threshold = cutting_threshold
         self.criterion = nn.BCELoss()
-        self.accuracy = torchmetrics.Accuracy(task="binary", average="none")
-        self.precision = torchmetrics.Precision(task="binary", average="none")
-        self.recall = torchmetrics.Recall(task="binary", average="none")
-        self.f1 = torchmetrics.F1Score(task="binary", average="none")
-        
+
         self.test_outputs = []
         self.test_results = {}
+
+    def compute_loss(self, y_hat, y, scale_factor):
+        loss = self.criterion(y_hat, y.float()) * scale_factor
+        return loss
 
     def forward(self, x):
         encoded = self.encoder(x)
@@ -34,7 +38,7 @@ class BinaryClassifier(pl.LightningModule):
         x, y, _ = batch
         y_hat = self(x)
         y_hat = y_hat.squeeze()
-        loss = self.criterion(y_hat, y.float())
+        loss = self.compute_loss(y_hat, y, 10)
         self.log("train_loss", loss)
         return loss
 
@@ -42,50 +46,51 @@ class BinaryClassifier(pl.LightningModule):
         x, y, _ = batch
         y_hat = self(x)
         y_hat = y_hat.squeeze()
-        loss = self.criterion(y_hat, y.float())
-        y_hat = y_hat > self.cutting_threshold
+        loss = self.compute_loss(y_hat, y, 10)
+        y_hat_bin = y_hat > self.cutting_threshold
         self.log("val_loss", loss, on_step=True, on_epoch=False)
-        self.accuracy(y_hat, y)
-        self.precision(y_hat, y)
-        self.recall(y_hat, y)
-        self.f1(y_hat, y)
+        self.accuracy(y_hat_bin, y)
+
+        self.test_outputs.append(
+            {"y": y.cpu().numpy(), "y_hat": y_hat_bin.cpu().numpy()}
+        )
         return loss
 
     def on_validation_epoch_end(self):
+        
+        
+        y = np.concatenate([x["y"] for x in self.test_outputs])
+        y_hat = np.concatenate([x["y_hat"] for x in self.test_outputs])
+        report = classification_report(y, y_hat, output_dict=True, zero_division=0)
 
-        self.log("val_acc", self.accuracy.compute())
-        self.log("val_precision", self.precision.compute())
-        self.log("val_recall", self.recall.compute())
-        self.log("val_f1", self.f1.compute())
+        # Log metrics for each class
+        self.log("val_acc", report["accuracy"])
+        self.log("val_precision_0", report["0"]["precision"])
+        self.log("val_recall_0", report["0"]["recall"])
+        self.log("val_f1_0", report["0"]["f1-score"])
+        self.log("val_precision_1", report["1"]["precision"])
+        self.log("val_recall_1", report["1"]["recall"])
+        self.log("val_f1_1", report["1"]["f1-score"])
+
+        # Reset for the next validation run
+        self.test_outputs = []
 
     def test_step(self, batch, batch_idx):
         x, y, _ = batch
         y_hat = self(x)
         y_hat = y_hat.squeeze()
-        loss = self.criterion(y_hat, y.float())
+        loss = self.compute_loss(y_hat, y, 10)
         y_hat = y_hat > self.cutting_threshold
         self.log("test_loss", loss, on_step=True, on_epoch=False)
         self.accuracy(y_hat, y)
-        self.precision(y_hat, y)
-        self.recall(y_hat, y)
-        self.f1(y_hat, y)
         self.test_outputs.append({"y": y.cpu().numpy(), "y_hat": y_hat.cpu().numpy()})
         return loss
 
     def on_test_epoch_end(self):
-        acc = self.accuracy.compute()
-        precision = self.precision.compute()
-        recall = self.recall.compute()
-        f1 = self.f1.compute()
         y = np.concatenate([x["y"] for x in self.test_outputs])
         y_hat = np.concatenate([x["y_hat"] for x in self.test_outputs])
         report = classification_report(y, y_hat, output_dict=True)
 
-        # Log metrics
-        self.log("test_acc", acc)
-        self.log("test_precision", precision)
-        self.log("test_recall", recall)
-        self.log("test_f1", f1)
         self.log("test_acc", report["accuracy"])
         self.log("test_precision_0", report["0"]["precision"])
         self.log("test_recall_0", report["0"]["recall"])
@@ -97,12 +102,7 @@ class BinaryClassifier(pl.LightningModule):
         # Reset for the next test run
         self.test_outputs = []
 
-        # Save metrics as an attribute
         self.test_results = {
-            "accuracy": acc,
-            "precision": precision,
-            "recall": recall,
-            "f1": f1,
             "classification_report": report,
         }
 

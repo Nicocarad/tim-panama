@@ -25,22 +25,30 @@ class LinearAutoencoder(pl.LightningModule):
         self.denoise = self.hyper_params["denoise"]
 
         self.slogans = slogans
+        self.dropout_rate = 0.3
 
-        # Definizione dell'encoder
         self.encoder = nn.Sequential(
             nn.Linear(self.input_size, 64),
+            nn.BatchNorm1d(64),
             nn.ReLU(),
+            # nn.Dropout(self.dropout_rate),
             nn.Linear(64, 32),
+            nn.BatchNorm1d(32),
             nn.ReLU(),
+            # nn.Dropout(self.dropout_rate),
         )
 
-        # Definizione del decoder
+        # Definizione del decoder con Dropout
         self.decoder = nn.Sequential(
             nn.Linear(32, 64),
+            nn.BatchNorm1d(64),
             nn.ReLU(),
+            # nn.Dropout(self.dropout_rate),
             nn.Linear(64, self.input_size),
             nn.Sigmoid(),
         )
+
+        self.apply(self.init_weights)
 
         # Inizializzazione della metrica
         self.perfect_reconstruction = PerfectReconstruction()
@@ -49,6 +57,12 @@ class LinearAutoencoder(pl.LightningModule):
         self.column_wise_recall = ColumnWiseRecall(self.input_size)
         self.column_wise_f1 = ColumnWiseF1(self.input_size)
         self.column_wise_f1_per_column = ColumnWiseF1PerColumn(self.input_size)
+
+    @staticmethod
+    def init_weights(m):
+        if type(m) == nn.Linear:
+            nn.init.xavier_uniform_(m.weight)
+            m.bias.data.fill_(0.01)
 
     def forward(self, x):
         encoded = self.encoder(x)
@@ -74,8 +88,11 @@ class LinearAutoencoder(pl.LightningModule):
 
         return optimizer
 
-    def compute_loss(self, x, x_hat):
-        return nn.MSELoss()(x_hat, x)
+    def compute_loss(self, x, x_hat, scale_factor=100):
+        # x_hat = (x_hat > self.cutting_threshold).float()
+        loss = nn.BCELoss()(x_hat, x)
+        scaled_loss = loss * scale_factor
+        return scaled_loss
 
     def update_metrics(self, x, x_hat):
         x_hat = (x_hat > self.cutting_threshold).float()
@@ -106,8 +123,6 @@ class LinearAutoencoder(pl.LightningModule):
             x_hat = self(x)
         loss = self.compute_loss(x, x_hat)
         self.log("val_loss", loss, sync_dist=True)
-        bce = nn.BCELoss()(x_hat, x)
-        self.log("val_bce", bce, sync_dist=True)
         self.update_metrics(x, x_hat)
 
     def on_validation_epoch_end(self):
@@ -155,8 +170,7 @@ class LinearAutoencoder(pl.LightningModule):
             x_hat = self(x)
         loss = self.compute_loss(x, x_hat)
         self.log("test_loss", loss)
-        bce = nn.BCELoss()(x_hat, x)
-        self.log("val_bce", bce, sync_dist=True)
+
         self.update_metrics(x, x_hat)
 
     def on_test_epoch_end(self):

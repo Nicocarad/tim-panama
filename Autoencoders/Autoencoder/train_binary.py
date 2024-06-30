@@ -21,11 +21,10 @@ comet_logger = CometLogger(
 experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
 
 
-# Configura l'autoencoder
 hyper_params = {
     "input_size": 32,
-    "batch_size": 8,
-    "epochs": 30,
+    "batch_size": 64,
+    "epochs": 35,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "learning_rate": 0.001,
@@ -37,7 +36,7 @@ hyper_params_auto = {
     "learning_rate": 1e-3,
     "batch_size": 64,
     "epochs": 30,
-    "input_size": 113,
+    "input_size": 1755,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "denoise": False,
@@ -46,7 +45,7 @@ hyper_params_auto = {
 
 
 original_dataset = TIMLP(
-    "result_df_gt_2_lavoriprogrammati_642.parquet",
+    "result_df_gt_2_lavoriprogrammati_1755.parquet",
     "20230101-20240101_real_time_clusters_filtered_guasto_cavo.csv",
 )
 
@@ -94,7 +93,7 @@ test_loader = DataLoader(
 
 
 autoencoder = LinearAutoencoder.load_from_checkpoint(
-    "./model_30epochs.ckpt", hyper_params=hyper_params_auto, slogans=None
+    "./model_30epochs_1755_new.ckpt", hyper_params=hyper_params_auto, slogans=None
 )
 
 # Estrai l'encoder dal modello addestrato
