@@ -9,6 +9,7 @@ import torch
 import pandas as pd
 from model_auto import LinearAutoencoder
 from binaryClassifier import BinaryClassifier
+import numpy as np
 
 
 # Creazione del logger una sola volta
@@ -53,6 +54,20 @@ original_dataset = TIMLP(
 train_indexes = pd.read_csv("train_indexes_lp.csv").values.flatten()
 val_indexes = pd.read_csv("val_indexes_lp.csv").values.flatten()
 test_indexes = pd.read_csv("test_indexes_lp.csv").values.flatten()
+
+# Unisci tutti gli indici in un unico array
+all_indexes = np.concatenate([train_indexes, val_indexes, test_indexes])
+# Esegui lo shuffle dell'array unificato
+np.random.shuffle(all_indexes)
+# Calcola le dimensioni originali
+train_size = len(train_indexes)
+val_size = len(val_indexes)
+test_size = len(test_indexes)
+
+# Ricrea le divisioni per train, validation e test
+train_indexes_shuffled = all_indexes[:train_size]
+val_indexes_shuffled = all_indexes[train_size:train_size+val_size]
+test_indexes_shuffled = all_indexes[train_size+val_size:]
 
 
 # Creazione dei subset utilizzando il dataset originale

@@ -9,20 +9,21 @@ import torch
 import pandas as pd
 from model_auto import LinearAutoencoder
 from binaryClassifier import BinaryClassifier
+import numpy as np
 from sklearn.model_selection import KFold
 
+NUM_FOLD = 5
 
 # Creazione del logger una sola volta
 comet_logger = CometLogger(
     api_key="knoxznRgLLK2INEJ9GIbmR7ww",
     project_name="TIM_thesis",
-    experiment_name="TIM autoencoder lavori programmati",
+    experiment_name="TIM autoencoder lavori programmati Kfold",
 )
 
 experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
 
 
-# Configura l'autoencoder
 hyper_params = {
     "input_size": 32,
     "batch_size": 64,
@@ -46,13 +47,31 @@ hyper_params_auto = {
 }
 
 
-test_results = {
-    "classification_report": {
-        "accuracy": 0,
-        "0": {"precision": 0, "recall": 0, "f1-score": 0},
-        "1": {"precision": 0, "recall": 0, "f1-score": 0},
-    }
-}
+original_dataset = TIMLP(
+    "result_df_gt_2_lavoriprogrammati_1755.parquet",
+    "20230101-20240101_real_time_clusters_filtered_guasto_cavo.csv",
+)
+
+
+# Definisci il KFold
+kf = KFold(n_splits=2, shuffle=True, random_state=42)
+
+train_indexes = pd.read_csv("train_indexes_lp.csv").values.flatten()
+val_indexes = pd.read_csv("val_indexes_lp.csv").values.flatten()
+test_indexes = pd.read_csv("test_indexes_lp.csv").values.flatten()
+
+# Unisci tutti gli indici in un unico array
+all_indexes = np.concatenate([train_indexes, val_indexes, test_indexes])
+
+# Calcola la dimensione di ogni fold
+fold_size = len(all_indexes) // NUM_FOLD
+
+# Assegna gli indici a ciascun fold
+fold1 = all_indexes[0:fold_size]
+fold2 = all_indexes[fold_size : 2 * fold_size]
+fold3 = all_indexes[2 * fold_size : 3 * fold_size]
+fold4 = all_indexes[3 * fold_size : 4 * fold_size]
+fold5 = all_indexes[4 * fold_size :]
 
 
 torch.manual_seed(42)
@@ -62,27 +81,21 @@ autoencoder = LinearAutoencoder.load_from_checkpoint(
     "./model_30epochs_1755_new.ckpt", hyper_params=hyper_params_auto, slogans=None
 )
 
-# Estrai l'encoder dal modello addestrato
+
 encoder = autoencoder.encoder
-# Creazione del dataset
-original_dataset = TIMLP(
-    "result_df_gt_2_lavoriprogrammati_1755.parquet",
-    "20230101-20240101_real_time_clusters_filtered_guasto_cavo.csv",
-)
 
-# Creazione dell'oggetto KFold
-kf = KFold(n_splits=2)
-print("Dataset Len ", len(original_dataset))
 
-# Applicazione della cross-validation K-Fold
-for train_indexes, test_indexes in kf.split(original_dataset):
-    # Creazione dei subset utilizzando il dataset originale
-    train_dataset = Subset(original_dataset, train_indexes)
-    test_dataset = Subset(original_dataset, test_indexes)
-    print("Train dataset length: ", len(train_dataset))
-    print("Test dataset length: ", len(test_dataset))
+results = []
 
-    # Creazione dei DataLoader
+for iter in range(NUM_FOLD):
+
+    folds = [fold1, fold2, fold3, fold4, fold5]
+    train_idx = np.concatenate([f for i, f in enumerate(folds) if i != iter])
+    val_idx = folds[iter]
+
+    train_dataset = Subset(original_dataset, train_idx)
+    val_dataset = Subset(original_dataset, val_idx)
+
     train_loader = DataLoader(
         train_dataset,
         batch_size=hyper_params["batch_size"],
@@ -90,15 +103,15 @@ for train_indexes, test_indexes in kf.split(original_dataset):
         drop_last=True,
         shuffle=False,
     )
-    test_loader = DataLoader(
-        test_dataset,
+
+    val_loader = DataLoader(
+        val_dataset,
         batch_size=hyper_params["batch_size"],
         num_workers=1,
         drop_last=True,
         shuffle=False,
     )
 
-    # Configura e addestra il classificatore
     classifier = BinaryClassifier(
         encoder,
         input_dim=hyper_params["input_size"],
@@ -112,54 +125,47 @@ for train_indexes, test_indexes in kf.split(original_dataset):
         default_root_dir="Checkpoints/",
     )
 
-    trainer.fit(classifier, train_loader, test_loader)
+    trainer.fit(classifier, train_loader)
 
-    trainer.test(classifier, test_loader)
+    trainer.test(classifier, val_loader)
 
-    # Aggiungi i risultati del test ai risultati totali
-    test_results["classification_report"]["accuracy"] += classifier.test_results[
-        "classification_report"
-    ]["accuracy"]
-    test_results["classification_report"]["0"]["precision"] += classifier.test_results[
-        "classification_report"
-    ]["0"]["precision"]
-    test_results["classification_report"]["0"]["recall"] += classifier.test_results[
-        "classification_report"
-    ]["0"]["recall"]
-    test_results["classification_report"]["0"]["f1-score"] += classifier.test_results[
-        "classification_report"
-    ]["0"]["f1-score"]
-    test_results["classification_report"]["1"]["precision"] += classifier.test_results[
-        "classification_report"
-    ]["1"]["precision"]
-    test_results["classification_report"]["1"]["recall"] += classifier.test_results[
-        "classification_report"
-    ]["1"]["recall"]
-    test_results["classification_report"]["1"]["f1-score"] += classifier.test_results[
-        "classification_report"
-    ]["1"]["f1-score"]
+    results.append(classifier.result_metrics)
 
-# Calcola la media dei risultati
-average_results = {
-    "classification_report": {
-        "accuracy": test_results["classification_report"]["accuracy"],
-        "0": {
-            "precision": test_results["classification_report"]["0"]["precision"]
-            / kf.get_n_splits(),
-            "recall": test_results["classification_report"]["0"]["recall"]
-            / kf.get_n_splits(),
-            "f1-score": test_results["classification_report"]["0"]["f1-score"]
-            / kf.get_n_splits(),
-        },
-        "1": {
-            "precision": test_results["classification_report"]["1"]["precision"]
-            / kf.get_n_splits(),
-            "recall": test_results["classification_report"]["1"]["recall"]
-            / kf.get_n_splits(),
-            "f1-score": test_results["classification_report"]["1"]["f1-score"]
-            / kf.get_n_splits(),
-        },
-    },
+print(results)
+
+
+sum_metrics = {
+    "0": {"precision": 0, "recall": 0, "f1-score": 0, "support": 0},
+    "1": {"precision": 0, "recall": 0, "f1-score": 0, "support": 0},
+    "accuracy": 0,
 }
 
-print(average_results)
+
+for report in results:
+
+    sum_metrics["0"]["precision"] += report["0"]["precision"]
+    sum_metrics["0"]["recall"] += report["0"]["recall"]
+    sum_metrics["0"]["f1-score"] += report["0"]["f1-score"]
+    sum_metrics["0"]["support"] += report["0"]["support"]
+
+    sum_metrics["1"]["precision"] += report["1"]["precision"]
+    sum_metrics["1"]["recall"] += report["1"]["recall"]
+    sum_metrics["1"]["f1-score"] += report["1"]["f1-score"]
+    sum_metrics["1"]["support"] += report["1"]["support"]
+
+    sum_metrics["accuracy"] += report["accuracy"]
+
+
+avg_metrics = {
+    "0": {metric: total / NUM_FOLD for metric, total in sum_metrics["0"].items()},
+    "1": {metric: total / NUM_FOLD for metric, total in sum_metrics["1"].items()},
+    "accuracy": sum_metrics["accuracy"] / NUM_FOLD,
+}
+
+
+comet_logger.experiment.log_metrics(avg_metrics["0"], prefix="avg/0/")
+comet_logger.experiment.log_metrics(avg_metrics["1"], prefix="avg/1/")
+comet_logger.experiment.log_metric("avg_accuracy", avg_metrics["accuracy"])
+
+
+print("Medie delle Metriche:", avg_metrics)
