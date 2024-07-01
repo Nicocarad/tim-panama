@@ -3,6 +3,7 @@ import torch.optim as optim
 import pytorch_lightning as pl
 from sklearn.metrics import classification_report
 import numpy as np
+import torch
 
 
 class BinaryClassifier(pl.LightningModule):
@@ -11,7 +12,7 @@ class BinaryClassifier(pl.LightningModule):
         self.val_outputs = []
         self.test_outputs = []
         self.result_metrics = 0
-        
+
         self.encoder = encoder
         self.classifier = nn.Sequential(
             nn.Linear(input_dim, 64),
@@ -22,6 +23,7 @@ class BinaryClassifier(pl.LightningModule):
         )
         self.learning_rate = learning_rate
         self.cutting_threshold = cutting_threshold
+
         self.criterion = nn.BCELoss()
 
     def compute_loss(self, y_hat, y, scale_factor):
@@ -93,7 +95,7 @@ class BinaryClassifier(pl.LightningModule):
         self.log("test_precision_1", report["1"]["precision"])
         self.log("test_recall_1", report["1"]["recall"])
         self.log("test_f1_1", report["1"]["f1-score"])
-        
+
         self.result_metrics = report
 
         self.test_outputs = []
