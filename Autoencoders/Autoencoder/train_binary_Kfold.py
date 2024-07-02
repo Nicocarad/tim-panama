@@ -13,6 +13,7 @@ import numpy as np
 from sklearn.model_selection import KFold
 
 NUM_FOLD = 5
+results = []
 
 # Creazione del logger una sola volta
 comet_logger = CometLogger(
@@ -27,7 +28,7 @@ experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
 hyper_params = {
     "input_size": 32,
     "batch_size": 64,
-    "epochs": 35,
+    "epochs": 40,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "learning_rate": 0.001,
@@ -52,9 +53,6 @@ original_dataset = TIMLP(
     "20230101-20240101_real_time_clusters_filtered_guasto_cavo.csv",
 )
 
-
-# Definisci il KFold
-kf = KFold(n_splits=2, shuffle=True, random_state=42)
 
 train_indexes = pd.read_csv("train_indexes_lp.csv").values.flatten()
 val_indexes = pd.read_csv("val_indexes_lp.csv").values.flatten()
@@ -81,11 +79,8 @@ autoencoder = LinearAutoencoder.load_from_checkpoint(
     "./model_30epochs_1755_new.ckpt", hyper_params=hyper_params_auto, slogans=None
 )
 
-
 encoder = autoencoder.encoder
 
-
-results = []
 
 for iter in range(NUM_FOLD):
 
