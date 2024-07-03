@@ -40,7 +40,7 @@ hyper_params_auto = {
     "learning_rate": 1e-3,
     "batch_size": 64,
     "epochs": 30,
-    "input_size": 1755,
+    "input_size": 1917,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "denoise": False,
@@ -49,7 +49,7 @@ hyper_params_auto = {
 
 
 original_dataset = TIMLP(
-    "result_df_gt_2_lavoriprogrammati_1755.parquet",
+    "result_df_gt_2_lavoriprogrammati_1917.parquet",
     "20230101-20240101_real_time_clusters_filtered_guasto_cavo.csv",
 )
 

@@ -17,7 +17,7 @@ from pytorch_lightning.callbacks import EarlyStopping
 comet_logger = CometLogger(
     api_key="knoxznRgLLK2INEJ9GIbmR7ww",
     project_name="TIM_thesis",
-    experiment_name="TIM autoencoder two layer 30epochs 1755 ",
+    experiment_name="TIM autoencoder two layer 30epochs 1917 ",
 )
 
 experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
@@ -28,7 +28,7 @@ hyper_params = {
     "learning_rate": 1e-3,
     "batch_size": 64,
     "epochs": 30,
-    "input_size": 1755,
+    "input_size": 1917,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "denoise": False,
@@ -39,7 +39,7 @@ comet_logger.log_hyperparams(hyper_params)
 
 
 original_dataset = TIMCL(
-    "result_df_gt_2_ne_type_1755.parquet",
+    "result_df_gt_2_ne_type_1917.parquet",
     hyper_params["denoise"],
     hyper_params["transofrm_type"],
 )
