@@ -5,12 +5,13 @@ import numpy as np
 
 
 class ClustersDataset(Dataset):
-    """ Loads the cluster bitmap dataset
+    """Loads the cluster bitmap dataset
     Args:
         data_path (str): path to the parquet file containing the dataset
         denoise (bool): if True, the dataset is loaded with noise
         transofrm_type (str): if "bitflip", the dataset is loadaed with bitflip noise otherwise with out-of-range noise
     """
+
     def __init__(self, data_path, denoise=False, transofrm_type=None):
 
         self.data = pd.read_parquet(data_path)

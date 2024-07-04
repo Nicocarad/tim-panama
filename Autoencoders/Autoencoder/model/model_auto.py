@@ -43,7 +43,6 @@ class LinearAutoencoder(pl.LightningModule):
             # nn.Dropout(self.dropout_rate),
         )
 
-        
         self.decoder = nn.Sequential(
             nn.Linear(32, 64),
             nn.BatchNorm1d(64),
@@ -55,7 +54,6 @@ class LinearAutoencoder(pl.LightningModule):
 
         self.apply(self.init_weights)
 
-       
         self.perfect_reconstruction = PerfectReconstruction()
         self.column_wise_accuracy = ColumnWiseAccuracy(self.input_size)
         self.column_wise_precision = ColumnWisePrecision(self.input_size)

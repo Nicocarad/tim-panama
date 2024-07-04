@@ -1,16 +1,16 @@
 import torch
 from torch.utils.data import Dataset
 import pandas as pd
-import numpy as np
 
 
 class LavoriProgrammatiDataset(Dataset):
-    """ Loads the cluster bitmap dataset with lavori programmati
+    """Loads the cluster bitmap dataset with lavori programmati
     Args:
         data_path (str): path to the parquet file containing the dataset
         label_path (str): path to the csv file containing the clusters with lavori programmati labels
-    
+
     """
+
     def __init__(self, data_path, label_path):
 
         self.data = pd.read_parquet(data_path)
@@ -39,4 +39,4 @@ if __name__ == "__main__":
     dataset = LavoriProgrammatiDataset(data_path, label_path)
     print(dataset.data)
     print(dataset[0])
-    print(len(dataset))  
+    print(len(dataset))

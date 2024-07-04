@@ -11,9 +11,7 @@ from Autoencoders.Autoencoder.model.model_auto import LinearAutoencoder
 from Autoencoders.Autoencoder.model.binaryClassifier import BinaryClassifier
 
 
-
-
-with open('config.txt', 'r') as file:
+with open("config.txt", "r") as file:
     API_KEY = file.read().strip()
 
 comet_logger = CometLogger(
