@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch.optim as optim
 import pytorch_lightning as pl
-from metrics import (
+from Autoencoders.Autoencoder.model.metrics import (
     PerfectReconstruction,
     ColumnWiseAccuracy,
     ColumnWisePrecision,

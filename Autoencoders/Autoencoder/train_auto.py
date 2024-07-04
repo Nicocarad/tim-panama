@@ -2,9 +2,9 @@ import comet_ml
 from comet_ml import Experiment
 from pytorch_lightning.loggers import CometLogger
 from torch.utils.data import Subset, DataLoader
-from TIMCL import TIMCL
+from Autoencoders.Autoencoder.ClusterDataset import TIMCL
 import pytorch_lightning as pl
-from model_auto import LinearAutoencoder
+from Autoencoders.Autoencoder.model.model_auto import LinearAutoencoder
 import torch
 import pandas as pd
 from pytorch_lightning import Trainer

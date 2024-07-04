@@ -2,13 +2,13 @@ import comet_ml
 from comet_ml import Experiment
 from pytorch_lightning.loggers import CometLogger
 from torch.utils.data import Subset, DataLoader
-from TIMLP import TIMLP
+from Autoencoders.Autoencoder.LavoriProgrammatiDataset import TIMLP
 import pytorch_lightning as pl
-from model_auto import LinearAutoencoder
+from Autoencoders.Autoencoder.model.model_auto import LinearAutoencoder
 import torch
 import pandas as pd
-from model_auto import LinearAutoencoder
-from binaryClassifier import BinaryClassifier
+from Autoencoders.Autoencoder.model.model_auto import LinearAutoencoder
+from Autoencoders.Autoencoder.model.binaryClassifier import BinaryClassifier
 import numpy as np
 from sklearn.model_selection import KFold
 

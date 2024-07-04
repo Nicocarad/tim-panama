@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 
-class TIMLP(Dataset):
+class LavoriProgrammatiDataset(Dataset):
     def __init__(self, data_path, label_path):
 
         self.data = pd.read_parquet(data_path)
@@ -32,7 +32,7 @@ class TIMLP(Dataset):
 if __name__ == "__main__":
     data_path = "Dataset split/Lavoro Programmato datasets/result_df_gt_2_lavoriprogrammati_1917.parquet"
     label_path = "Dataset split/Lavoro Programmato datasets/20230101-20240101_real_time_clusters_filtered_guasto_cavo.csv"
-    dataset = TIMLP(data_path, label_path)
+    dataset = LavoriProgrammatiDataset(data_path, label_path)
     print(dataset.data)
     print(dataset[0])  
     print(len(dataset))  # Stampa la lunghezza del dataset
