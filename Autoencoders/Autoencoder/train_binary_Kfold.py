@@ -2,13 +2,13 @@ import comet_ml
 from comet_ml import Experiment
 from pytorch_lightning.loggers import CometLogger
 from torch.utils.data import Subset, DataLoader
-from Autoencoders.Autoencoder.LavoriProgrammatiDataset import LavoriProgrammatiDataset
+from LavoriProgrammatiDataset import LavoriProgrammatiDataset
 import pytorch_lightning as pl
-from Autoencoders.Autoencoder.model.model_auto import LinearAutoencoder
+from model.model_auto import LinearAutoencoder
 import torch
 import pandas as pd
-from Autoencoders.Autoencoder.model.model_auto import LinearAutoencoder
-from Autoencoders.Autoencoder.model.binaryClassifier import BinaryClassifier
+from model.model_auto import LinearAutoencoder
+from model.binaryClassifier import BinaryClassifier
 import numpy as np
 
 
