@@ -10,14 +10,16 @@ import pandas as pd
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping
 
-
+with open('config.txt', 'r') as file:
+    API_KEY = file.read().strip()
+    
 comet_logger = CometLogger(
-    api_key="knoxznRgLLK2INEJ9GIbmR7ww",
+    api_key=API_KEY,
     project_name="TIM_thesis",
     experiment_name="TIM autoencoder two layer 30epochs 1917 ",
 )
 
-experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
+experiment = Experiment(api_key=API_KEY)
 
 
 hyper_params = {
