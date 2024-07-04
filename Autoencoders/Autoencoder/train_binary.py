@@ -46,14 +46,14 @@ hyper_params_auto = {
 
 
 original_dataset = TIMLP(
-    "result_df_gt_2_lavoriprogrammati_1755.parquet",
+    "result_df_gt_2_lavoriprogrammati_1917.parquet",
     "20230101-20240101_real_time_clusters_filtered_guasto_cavo.csv",
 )
 
 
-train_indexes = pd.read_csv("train_indexes_lp.csv").values.flatten()
-val_indexes = pd.read_csv("val_indexes_lp.csv").values.flatten()
-test_indexes = pd.read_csv("test_indexes_lp.csv").values.flatten()
+train_indexes = pd.read_csv("train_indexes_link_lp.csv").values.flatten()
+val_indexes = pd.read_csv("val_indexes_link_lp.csv").values.flatten()
+test_indexes = pd.read_csv("test_indexes_link_lp.csv").values.flatten()
 
 
 
@@ -95,7 +95,7 @@ test_loader = DataLoader(
 
 
 autoencoder = LinearAutoencoder.load_from_checkpoint(
-    "./model_30epochs_1755_new.ckpt", hyper_params=hyper_params_auto, slogans=None
+    "./model_18epochs_1917.ckpt", hyper_params=hyper_params_auto, slogans=None
 )
 
 # Estrai l'encoder dal modello addestrato

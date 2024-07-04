@@ -39,7 +39,7 @@ comet_logger.log_hyperparams(hyper_params)
 
 
 original_dataset = TIMCL(
-    "result_df_gt_2_ne_type_1917.parquet",
+    "result_df_gt_2_ne_type_link_1917.parquet",
     hyper_params["denoise"],
     hyper_params["transofrm_type"],
 )

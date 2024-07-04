@@ -54,9 +54,9 @@ original_dataset = TIMLP(
 )
 
 
-train_indexes = pd.read_csv("train_indexes_lp.csv").values.flatten()
-val_indexes = pd.read_csv("val_indexes_lp.csv").values.flatten()
-test_indexes = pd.read_csv("test_indexes_lp.csv").values.flatten()
+train_indexes = pd.read_csv("train_indexes_link_lp.csv").values.flatten()
+val_indexes = pd.read_csv("val_indexes_link_lp.csv").values.flatten()
+test_indexes = pd.read_csv("test_indexes_link_lp.csv").values.flatten()
 
 # Unisci tutti gli indici in un unico array
 all_indexes = np.concatenate([train_indexes, val_indexes, test_indexes])
@@ -76,7 +76,7 @@ torch.manual_seed(42)
 
 
 autoencoder = LinearAutoencoder.load_from_checkpoint(
-    "./model_30epochs_1755_new.ckpt", hyper_params=hyper_params_auto, slogans=None
+    "./model_18epochs_1917.ckpt", hyper_params=hyper_params_auto, slogans=None
 )
 
 encoder = autoencoder.encoder
