@@ -2,17 +2,17 @@ import comet_ml
 from comet_ml import Experiment
 from pytorch_lightning.loggers import CometLogger
 from torch.utils.data import Subset, DataLoader
-from Autoencoders.Autoencoder.LavoriProgrammatiDataset import TIMLP
+from Autoencoders.Autoencoder.LavoriProgrammatiDataset import LavoriProgrammatiDataset
 import pytorch_lightning as pl
 from Autoencoders.Autoencoder.model.model_auto import LinearAutoencoder
 import torch
 import pandas as pd
 from Autoencoders.Autoencoder.model.model_auto import LinearAutoencoder
 from Autoencoders.Autoencoder.model.binaryClassifier import BinaryClassifier
-import numpy as np
 
 
-# Leggi l'API key da un file
+
+
 with open('config.txt', 'r') as file:
     API_KEY = file.read().strip()
 
@@ -49,7 +49,7 @@ hyper_params_auto = {
 }
 
 
-original_dataset = TIMLP(
+original_dataset = LavoriProgrammatiDataset(
     "result_df_gt_2_lavoriprogrammati_1917.parquet",
     "20230101-20240101_real_time_clusters_filtered_guasto_cavo.csv",
 )
@@ -100,7 +100,7 @@ autoencoder = LinearAutoencoder.load_from_checkpoint(
     "./model_18epochs_1917.ckpt", hyper_params=hyper_params_auto, slogans=None
 )
 
-# Estrai l'encoder dal modello addestrato
+
 encoder = autoencoder.encoder
 
 
