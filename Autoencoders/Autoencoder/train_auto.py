@@ -2,7 +2,7 @@ import comet_ml
 from comet_ml import Experiment
 from pytorch_lightning.loggers import CometLogger
 from torch.utils.data import Subset, DataLoader
-from Autoencoders.Autoencoder.ClusterDataset import TIMCL
+from Autoencoders.Autoencoder.ClusterDataset import ClustersDataset
 import pytorch_lightning as pl
 from Autoencoders.Autoencoder.model.model_auto import LinearAutoencoder
 import torch
@@ -36,7 +36,7 @@ hyper_params = {
 comet_logger.log_hyperparams(hyper_params)
 
 
-original_dataset = TIMCL(
+original_dataset = ClustersDataset(
     "result_df_gt_2_ne_type_link_1917.parquet",
     hyper_params["denoise"],
     hyper_params["transofrm_type"],
