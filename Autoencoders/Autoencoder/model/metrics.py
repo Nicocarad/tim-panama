@@ -10,25 +10,16 @@ class PerfectReconstruction(torchmetrics.Metric):
 
     def __init__(self, dist_sync_on_step=False):
         super().__init__(dist_sync_on_step=dist_sync_on_step)
-        # Aggiunge uno stato "perfect" per tenere traccia del numero di previsioni perfette
         self.add_state("perfect", default=torch.tensor(0), dist_reduce_fx="sum")
-        # Aggiunge uno stato "total" per tenere traccia del numero totale di previsioni
         self.add_state("total", default=torch.tensor(0), dist_reduce_fx="sum")
 
     def update(self, preds, target):
 
         assert preds.shape == target.shape
-        
-        # Aggiorna il conteggio delle previsioni perfette
         self.perfect += torch.sum(torch.all(preds == target, dim=1)).item()
-        # Aggiorna il conteggio totale delle previsioni
         self.total += target.shape[0]
 
     def compute(self):
-        # Stampa il numero di previsioni perfette e il totale delle previsioni
-        # print(f"Perfect: {self.perfect}")
-        # print(f"Total: {self.total}")
-        # Calcola e restituisce l'accuracy come il rapporto tra le previsioni perfette e il totale delle previsioni
         return self.perfect / self.total
 
 
@@ -64,7 +55,6 @@ class BaseMetric(torchmetrics.Metric):
         self.false_positives += false_positives
         self.false_negatives += false_negatives
         self.true_negatives += true_negatives
-        
 
 
 class ColumnWiseAccuracy(BaseMetric):
@@ -74,15 +64,13 @@ class ColumnWiseAccuracy(BaseMetric):
     """
 
     def compute(self):
-        total = self.true_positives + self.false_positives + self.false_negatives + self.true_negatives
+        total = (
+            self.true_positives
+            + self.false_positives
+            + self.false_negatives
+            + self.true_negatives
+        )
         correct = self.true_positives + self.true_negatives
-        # print("True positives: ", self.true_positives)
-        # print("False positives: ", self.false_positives)
-        # print("False negatives: ", self.false_negatives)
-        # print("True negatives: ", self.true_negatives)
-        # print(f"Total: {total}")
-        # print(f"Correct: {correct}")
-        
         global_accuracy = torch.mean(
             torch.where(total > 0, correct / total, torch.zeros_like(total))
         )
@@ -141,9 +129,8 @@ class ColumnWiseF1(BaseMetric):
             torch.where(torch.isfinite(f1), f1, torch.zeros_like(f1))
         )
         return global_f1
-    
-    
-    
+
+
 class ColumnWiseF1PerColumn(BaseMetric):
     """
     This metric calculates the F1 score for each individual column of the prediction and target tensors.

@@ -2,7 +2,7 @@ import comet_ml
 from comet_ml import Experiment
 from pytorch_lightning.loggers import CometLogger
 from torch.utils.data import Subset, DataLoader
-from Autoencoders.Autoencoder.LavoriProgrammatiDataset import TIMLP
+from Autoencoders.Autoencoder.LavoriProgrammatiDataset import LavoriProgrammatiDataset
 import pytorch_lightning as pl
 from Autoencoders.Autoencoder.model.model_auto import LinearAutoencoder
 import torch
@@ -10,12 +10,11 @@ import pandas as pd
 from Autoencoders.Autoencoder.model.model_auto import LinearAutoencoder
 from Autoencoders.Autoencoder.model.binaryClassifier import BinaryClassifier
 import numpy as np
-from sklearn.model_selection import KFold
+
 
 NUM_FOLD = 5
 results = []
 
-# Creazione del logger una sola volta
 comet_logger = CometLogger(
     api_key="knoxznRgLLK2INEJ9GIbmR7ww",
     project_name="TIM_thesis",
@@ -48,7 +47,7 @@ hyper_params_auto = {
 }
 
 
-original_dataset = TIMLP(
+original_dataset = LavoriProgrammatiDataset(
     "result_df_gt_2_lavoriprogrammati_1917.parquet",
     "20230101-20240101_real_time_clusters_filtered_guasto_cavo.csv",
 )
@@ -58,13 +57,12 @@ train_indexes = pd.read_csv("train_indexes_link_lp.csv").values.flatten()
 val_indexes = pd.read_csv("val_indexes_link_lp.csv").values.flatten()
 test_indexes = pd.read_csv("test_indexes_link_lp.csv").values.flatten()
 
-# Unisci tutti gli indici in un unico array
+
 all_indexes = np.concatenate([train_indexes, val_indexes, test_indexes])
 
-# Calcola la dimensione di ogni fold
+
 fold_size = len(all_indexes) // NUM_FOLD
 
-# Assegna gli indici a ciascun fold
 fold1 = all_indexes[0:fold_size]
 fold2 = all_indexes[fold_size : 2 * fold_size]
 fold3 = all_indexes[2 * fold_size : 3 * fold_size]
@@ -163,4 +161,4 @@ comet_logger.experiment.log_metrics(avg_metrics["1"], prefix="avg/1/")
 comet_logger.experiment.log_metric("avg_accuracy", avg_metrics["accuracy"])
 
 
-print("Medie delle Metriche:", avg_metrics)
+print("Average results", avg_metrics)

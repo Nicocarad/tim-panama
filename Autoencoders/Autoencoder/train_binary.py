@@ -12,7 +12,6 @@ from Autoencoders.Autoencoder.model.binaryClassifier import BinaryClassifier
 import numpy as np
 
 
-# Creazione del logger una sola volta
 comet_logger = CometLogger(
     api_key="knoxznRgLLK2INEJ9GIbmR7ww",
     project_name="TIM_thesis",
@@ -37,7 +36,7 @@ hyper_params_auto = {
     "learning_rate": 1e-3,
     "batch_size": 64,
     "epochs": 30,
-    "input_size": 1755,
+    "input_size": 1917,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "denoise": False,
@@ -56,8 +55,6 @@ val_indexes = pd.read_csv("val_indexes_link_lp.csv").values.flatten()
 test_indexes = pd.read_csv("test_indexes_link_lp.csv").values.flatten()
 
 
-
-# Creazione dei subset utilizzando il dataset originale
 train_dataset = Subset(original_dataset, train_indexes)
 val_dataset = Subset(original_dataset, val_indexes)
 test_dataset = Subset(original_dataset, test_indexes)
@@ -101,10 +98,7 @@ autoencoder = LinearAutoencoder.load_from_checkpoint(
 # Estrai l'encoder dal modello addestrato
 encoder = autoencoder.encoder
 
-# Estrai l'encoder dal modello addestrato
-encoder = autoencoder.encoder
 
-# Configura e addestra il classificatore
 classifier = BinaryClassifier(
     encoder,
     input_dim=hyper_params["input_size"],
@@ -118,5 +112,4 @@ trainer = pl.Trainer(
 )
 trainer.fit(classifier, train_loader, test_loader)
 
-# Valuta il classificatore
 trainer.test(classifier, test_loader)

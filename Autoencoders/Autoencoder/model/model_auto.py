@@ -12,6 +12,11 @@ from Autoencoders.Autoencoder.model.metrics import (
 
 
 class LinearAutoencoder(pl.LightningModule):
+    """
+    Autencoder with only MLP layers, trying to reconstruct the clusters
+
+    """
+
     def __init__(self, hyper_params, slogans):
         super(LinearAutoencoder, self).__init__()
 
@@ -38,7 +43,7 @@ class LinearAutoencoder(pl.LightningModule):
             # nn.Dropout(self.dropout_rate),
         )
 
-        # Definizione del decoder con Dropout
+        
         self.decoder = nn.Sequential(
             nn.Linear(32, 64),
             nn.BatchNorm1d(64),
@@ -50,7 +55,7 @@ class LinearAutoencoder(pl.LightningModule):
 
         self.apply(self.init_weights)
 
-        # Inizializzazione della metrica
+       
         self.perfect_reconstruction = PerfectReconstruction()
         self.column_wise_accuracy = ColumnWiseAccuracy(self.input_size)
         self.column_wise_precision = ColumnWisePrecision(self.input_size)
@@ -89,7 +94,6 @@ class LinearAutoencoder(pl.LightningModule):
         return optimizer
 
     def compute_loss(self, x, x_hat, scale_factor=100):
-        # x_hat = (x_hat > self.cutting_threshold).float()
         loss = nn.BCELoss()(x_hat, x)
         scaled_loss = loss * scale_factor
         return scaled_loss

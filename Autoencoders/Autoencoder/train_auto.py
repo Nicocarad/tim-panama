@@ -11,9 +11,6 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping
 
 
-
-
-# Creazione del logger una sola volta
 comet_logger = CometLogger(
     api_key="knoxznRgLLK2INEJ9GIbmR7ww",
     project_name="TIM_thesis",
@@ -23,7 +20,6 @@ comet_logger = CometLogger(
 experiment = Experiment(api_key="knoxznRgLLK2INEJ9GIbmR7ww")
 
 
-# Report multiple hyperparameters using a dictionary:
 hyper_params = {
     "learning_rate": 1e-3,
     "batch_size": 64,
@@ -50,7 +46,6 @@ val_indexes = pd.read_csv("val_indexes_link.csv").values.flatten()
 test_indexes = pd.read_csv("test_indexes_link.csv").values.flatten()
 
 
-# Creazione dei subset utilizzando il dataset originale
 train_dataset = Subset(original_dataset, train_indexes)
 val_dataset = Subset(original_dataset, val_indexes)
 test_dataset = Subset(original_dataset, test_indexes)
@@ -103,9 +98,5 @@ trainer = pl.Trainer(
 )
 
 
-
-
 trainer.fit(autoencoder, train_loader, val_dataloaders=val_loader)
-
-
 trainer.test(autoencoder, test_loader)

@@ -3,10 +3,16 @@ import torch.optim as optim
 import pytorch_lightning as pl
 from sklearn.metrics import classification_report
 import numpy as np
-import torch
 
 
 class BinaryClassifier(pl.LightningModule):
+    """
+    Perform binary classification on the encoded data predicting a cluster as GUASTO CAVO cluster or NON GUASTO CAVO
+    Class 0: NON GUASTO CAVO
+    Class 1: GUASTO CAVO
+
+    """
+
     def __init__(self, encoder, input_dim, learning_rate, cutting_threshold):
         super(BinaryClassifier, self).__init__()
         self.val_outputs = []
@@ -101,5 +107,7 @@ class BinaryClassifier(pl.LightningModule):
         self.test_outputs = []
 
     def configure_optimizers(self):
-        optimizer = optim.Adam(self.classifier.parameters(), lr=self.learning_rate, weight_decay=1e-5)
+        optimizer = optim.Adam(
+            self.classifier.parameters(), lr=self.learning_rate, weight_decay=1e-5
+        )
         return optimizer

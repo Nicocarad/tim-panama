@@ -5,10 +5,16 @@ import numpy as np
 
 
 class ClustersDataset(Dataset):
+    """ Loads the cluster bitmap dataset
+    Args:
+        data_path (str): path to the parquet file containing the dataset
+        denoise (bool): if True, the dataset is loaded with noise
+        transofrm_type (str): if "bitflip", the dataset is loadaed with bitflip noise otherwise with out-of-range noise
+    """
     def __init__(self, data_path, denoise=False, transofrm_type=None):
 
         self.data = pd.read_parquet(data_path)
-        self.cluster_ids = self.data.index  # Utilizza l'indice del DataFrame
+        self.cluster_ids = self.data.index
         self.slogan = self.data.columns.tolist()
         self.denoise = denoise
         self.transform_type = transofrm_type
@@ -16,7 +22,7 @@ class ClustersDataset(Dataset):
             print("Denoising Activated")
 
     def __getitem__(self, idx):
-        # Restituisce una riga del dataset e l'ID del cluster come un tensore
+
         item = torch.tensor(self.data.iloc[idx].values, dtype=torch.float32)
         cluster_id = f"cluster_id2={self.cluster_ids[idx]}"
         masked_item = item.clone()
@@ -43,5 +49,5 @@ if __name__ == "__main__":
     dataset = ClustersDataset(data_path, denoise=True, transofrm_type="bitflip")
     print(dataset.data)
     print(dataset.slogan)
-    print(dataset[2])  # Stampa il tensore rappresentante la riga e l'ID del cluster
-    print(len(dataset))  # Stampa la lunghezza del dataset
+    print(dataset[2])
+    print(len(dataset))
