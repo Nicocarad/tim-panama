@@ -8,6 +8,7 @@ from model.model_auto import LinearAutoencoder
 import torch
 import pandas as pd
 from pytorch_lightning.callbacks import EarlyStopping
+import argparse
 
 with open("config.txt", "r") as file:
     API_KEY = file.read().strip()
@@ -21,15 +22,72 @@ comet_logger = CometLogger(
 experiment = Experiment(api_key=API_KEY)
 
 
+def parse_args():
+    parse = argparse.ArgumentParser()
+
+    parse.add_argument(
+        "--input_size",
+        type=int,
+        default=1917,
+    )
+
+    parse.add_argument(
+        "--batch_size",
+        type=int,
+        default=64,
+    )
+
+    parse.add_argument(
+        "--epochs",
+        type=int,
+        default=30,
+    )
+
+    parse.add_argument(
+        "--cutting_threshold",
+        type=float,
+        default=0.5,
+    )
+
+    parse.add_argument(
+        "--optimizer",
+        type=str,
+        default="Adam",
+    )
+
+    parse.add_argument(
+        "--learning_rate",
+        type=float,
+        default=1e-3,
+    )
+
+    parse.add_argument(
+        "--denoise",
+        type=bool,
+        default=False,
+    )
+
+    parse.add_argument(
+        "--transofrm_type",
+        type=str,
+        default="out-of-range",
+    )
+
+    return parse.parse_args()
+
+
+args = parse_args()
+
+
 hyper_params = {
-    "learning_rate": 1e-3,
-    "batch_size": 64,
-    "epochs": 30,
-    "input_size": 1917,
-    "cutting_threshold": 0.5,
-    "optimizer": "Adam",
-    "denoise": False,
-    "transofrm_type": "out-of-range",
+    "learning_rate": args.learning_rate,
+    "batch_size": args.batch_size,
+    "epochs": args.epochs,
+    "input_size": args.input_size,
+    "cutting_threshold": args.cutting_threshold,
+    "optimizer": args.optimizer,
+    "denoise": args.denoise,
+    "transofrm_type": args.transofrm_type,
 }
 
 comet_logger.log_hyperparams(hyper_params)
@@ -42,9 +100,15 @@ original_dataset = ClustersDataset(
 )
 
 
-train_indexes = pd.read_csv("train_indexes_link.csv").values.flatten()
-val_indexes = pd.read_csv("val_indexes_link.csv").values.flatten()
-test_indexes = pd.read_csv("test_indexes_link.csv").values.flatten()
+train_indexes = pd.read_csv(
+    "Autoencoders/Autoencoder/Dataset split/Base datasets/train_indexes_link.csv"
+).values.flatten()
+val_indexes = pd.read_csv(
+    "Autoencoders/Autoencoder/Dataset split/Base datasets/val_indexes_link.csv"
+).values.flatten()
+test_indexes = pd.read_csv(
+    "Autoencoders/Autoencoder/Dataset split/Base datasets/test_indexes_link.csv"
+).values.flatten()
 
 
 train_dataset = Subset(original_dataset, train_indexes)

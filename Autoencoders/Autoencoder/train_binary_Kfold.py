@@ -10,7 +10,7 @@ import pandas as pd
 from model.model_auto import LinearAutoencoder
 from model.binaryClassifier import BinaryClassifier
 import numpy as np
-
+import argparse
 
 NUM_FOLD = 5
 results = []
@@ -27,13 +27,57 @@ comet_logger = CometLogger(
 experiment = Experiment(api_key=API_KEY)
 
 
+def parse_args():
+    parse = argparse.ArgumentParser()
+
+    parse.add_argument(
+        "--input_size",
+        type=int,
+        default=32,
+    )
+
+    parse.add_argument(
+        "--batch_size",
+        type=int,
+        default=64,
+    )
+
+    parse.add_argument(
+        "--epochs",
+        type=int,
+        default=15,
+    )
+
+    parse.add_argument(
+        "--cutting_threshold",
+        type=float,
+        default=0.5,
+    )
+
+    parse.add_argument(
+        "--optimizer",
+        type=str,
+        default="Adam",
+    )
+
+    parse.add_argument(
+        "--learning_rate",
+        type=float,
+        default=0.001,
+    )
+
+    return parse.parse_args()
+
+
+args = parse_args()
+
 hyper_params = {
-    "input_size": 32,
-    "batch_size": 64,
-    "epochs": 40,
-    "cutting_threshold": 0.5,
-    "optimizer": "Adam",
-    "learning_rate": 0.001,
+    "input_size": args.input_size,
+    "batch_size": args.batch_size,
+    "epochs": args.epochs,
+    "cutting_threshold": args.cutting_threshold,
+    "optimizer": args.optimizer,
+    "learning_rate": args.learning_rate,
 }
 
 comet_logger.log_hyperparams(hyper_params)
@@ -56,9 +100,9 @@ original_dataset = LavoriProgrammatiDataset(
 )
 
 
-train_indexes = pd.read_csv("train_indexes_link_lp.csv").values.flatten()
-val_indexes = pd.read_csv("val_indexes_link_lp.csv").values.flatten()
-test_indexes = pd.read_csv("test_indexes_link_lp.csv").values.flatten()
+train_indexes = pd.read_csv("Autoencoders/Autoencoder/Dataset split/Lavoro Programmato datasets/train_indexes_link_lp.csv").values.flatten()
+val_indexes = pd.read_csv("Autoencoders/Autoencoder/Dataset split/Lavoro Programmato datasets/val_indexes_link_lp.csv").values.flatten()
+test_indexes = pd.read_csv("Autoencoders/Autoencoder/Dataset split/Lavoro Programmato datasets/test_indexes_link_lp.csv").values.flatten()
 
 
 all_indexes = np.concatenate([train_indexes, val_indexes, test_indexes])
