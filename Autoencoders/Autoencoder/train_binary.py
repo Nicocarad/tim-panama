@@ -25,11 +25,11 @@ experiment = Experiment(api_key=API_KEY)
 
 hyper_params = {
     "input_size": 32,
-    "batch_size": 64,
-    "epochs": 50,
+    "batch_size": 32,
+    "epochs": 15,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
-    "learning_rate": 0.001,
+    "learning_rate": 0.009,
 }
 
 comet_logger.log_hyperparams(hyper_params)

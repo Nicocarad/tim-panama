@@ -108,6 +108,6 @@ class BinaryClassifier(pl.LightningModule):
 
     def configure_optimizers(self):
         optimizer = optim.Adam(
-            self.classifier.parameters(), lr=self.learning_rate, weight_decay=1e-5
+            self.classifier.parameters(), lr=self.learning_rate, weight_decay=1e-6
         )
         return optimizer
