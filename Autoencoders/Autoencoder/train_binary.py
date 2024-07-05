@@ -60,7 +60,7 @@ def parse_args():
     parse.add_argument(
         "--learning_rate",
         type=float,
-        default=0.001,
+        default=0.0008,
     )
 
     return parse.parse_args()
