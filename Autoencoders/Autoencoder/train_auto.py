@@ -16,7 +16,7 @@ with open("config.txt", "r") as file:
 comet_logger = CometLogger(
     api_key=API_KEY,
     project_name="TIM_thesis",
-    experiment_name="TIM autoencoder two layer 30epochs 1917 ",
+    experiment_name="TIM autoencoder two layer 30epochs ",
 )
 
 experiment = Experiment(api_key=API_KEY)
@@ -94,7 +94,7 @@ comet_logger.log_hyperparams(hyper_params)
 
 
 original_dataset = ClustersDataset(
-    "Autoencoders/Autoencoder/Dataset split/Base datasets/result_df_gt_2_ne_type_link_1917.parquet",
+    "Autoencoders/Autoencoder/Dataset split/Base datasets/result_df_gt_2_ne_type_link.parquet",
     hyper_params["denoise"],
     hyper_params["transofrm_type"],
 )
