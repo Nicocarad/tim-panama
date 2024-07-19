@@ -86,7 +86,7 @@ hyper_params_auto = {
     "learning_rate": 1e-3,
     "batch_size": 64,
     "epochs": 30,
-    "input_size": 1917,
+    "input_size": 1776,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "denoise": False,
@@ -95,7 +95,7 @@ hyper_params_auto = {
 
 
 original_dataset = LavoriProgrammatiDataset(
-    "Autoencoders/Autoencoder/Dataset split/Lavoro Programmato datasets/result_df_gt_2_lavoriprogrammati_1917.parquet",
+    "Autoencoders/Autoencoder/Dataset split/Lavoro Programmato datasets/result_df_gt_2_lavoriprogrammati.parquet",
     "Autoencoders/Autoencoder/Dataset split/Lavoro Programmato datasets/20230101-20240101_real_time_clusters_filtered_guasto_cavo.csv",
 )
 
@@ -121,7 +121,7 @@ torch.manual_seed(42)
 
 
 autoencoder = LinearAutoencoder.load_from_checkpoint(
-    "Autoencoders/Autoencoder/Checkpoints/model_18epochs_1917.ckpt", hyper_params=hyper_params_auto, slogans=None
+    "Autoencoders/Autoencoder/Checkpoints/model_18epochs.ckpt", hyper_params=hyper_params_auto, slogans=None
 )
 
 encoder = autoencoder.encoder

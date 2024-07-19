@@ -28,7 +28,7 @@ def parse_args():
     parse.add_argument(
         "--input_size",
         type=int,
-        default=1917,
+        default=1776,
     )
 
     parse.add_argument(
