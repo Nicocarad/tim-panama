@@ -121,7 +121,7 @@ torch.manual_seed(42)
 
 
 autoencoder = LinearAutoencoder.load_from_checkpoint(
-    "Autoencoders/Autoencoder/Checkpoints/model_18epochs.ckpt", hyper_params=hyper_params_auto, slogans=None
+    "Autoencoders/Autoencoder/Checkpoints/epoch=20-step=141540.ckpt", hyper_params=hyper_params_auto, slogans=None
 )
 
 encoder = autoencoder.encoder
