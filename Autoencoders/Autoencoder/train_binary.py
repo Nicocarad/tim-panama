@@ -24,46 +24,15 @@ comet_logger = CometLogger(
 experiment = Experiment(api_key=API_KEY)
 
 
-def parse_args():
-    parse = argparse.ArgumentParser()
-
-    parse.add_argument(
-        "--input_size",
-        type=int,
-        default=32,
-    )
-
-    parse.add_argument(
-        "--batch_size",
-        type=int,
-        default=32,
-    )
-
-    parse.add_argument(
-        "--epochs",
-        type=int,
-        default=15,
-    )
-
-    parse.add_argument(
-        "--cutting_threshold",
-        type=float,
-        default=0.5,
-    )
-
-    parse.add_argument(
-        "--optimizer",
-        type=str,
-        default="Adam",
-    )
-
-    parse.add_argument(
-        "--learning_rate",
-        type=float,
-        default=0.0008,
-    )
-
-    return parse.parse_args()
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input_size", type=int, default=32)
+    parser.add_argument("--batch_size", type=int, default=32)
+    parser.add_argument("--epochs", type=int, default=30)
+    parser.add_argument("--cutting_threshold", type=float, default=0.5)
+    parser.add_argument("--optimizer", type=str, default="Adam")
+    parser.add_argument("--learning_rate", type=float, default=0.0008)
+    return parser.parse_args()
 
 
 args = parse_args()

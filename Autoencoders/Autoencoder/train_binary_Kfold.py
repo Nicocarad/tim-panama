@@ -12,7 +12,7 @@ from model.binaryClassifier import BinaryClassifier
 import numpy as np
 import argparse
 
-NUM_FOLD = 5
+NUM_FOLD = 12
 results = []
 
 with open("config.txt", "r") as file:
@@ -114,7 +114,14 @@ fold1 = all_indexes[0:fold_size]
 fold2 = all_indexes[fold_size : 2 * fold_size]
 fold3 = all_indexes[2 * fold_size : 3 * fold_size]
 fold4 = all_indexes[3 * fold_size : 4 * fold_size]
-fold5 = all_indexes[4 * fold_size :]
+fold5 = all_indexes[4 * fold_size : 5 * fold_size]
+fold6 = all_indexes[5 * fold_size : 6 * fold_size]
+fold7 = all_indexes[6 * fold_size : 7 * fold_size]
+fold8 = all_indexes[7 * fold_size : 8 * fold_size]
+fold9 = all_indexes[8 * fold_size : 9 * fold_size]
+fold10 = all_indexes[9 * fold_size : 10 * fold_size]
+fold11 = all_indexes[10 * fold_size : 11 * fold_size]
+fold12 = all_indexes[11 * fold_size :]
 
 
 torch.manual_seed(42)
@@ -129,7 +136,7 @@ encoder = autoencoder.encoder
 
 for iter in range(NUM_FOLD):
 
-    folds = [fold1, fold2, fold3, fold4, fold5]
+    folds = [fold1, fold2, fold3, fold4, fold5, fold6, fold7, fold8, fold9, fold10, fold11, fold12]
     train_idx = np.concatenate([f for i, f in enumerate(folds) if i != iter])
     val_idx = folds[iter]
 
@@ -171,7 +178,6 @@ for iter in range(NUM_FOLD):
 
     results.append(classifier.result_metrics)
 
-print(results)
 
 
 sum_metrics = {
