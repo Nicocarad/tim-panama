@@ -2,7 +2,7 @@ import comet_ml
 from comet_ml import Experiment
 from pytorch_lightning.loggers import CometLogger
 from torch.utils.data import Subset, DataLoader
-from ClusterDataset import ClustersDataset
+from ClusterDataset import ClusterDataset
 import pytorch_lightning as pl
 from model.model_auto import LinearAutoencoder
 import torch
@@ -29,6 +29,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--cutting_threshold", type=float, default=0.5)
     parser.add_argument("--optimizer", type=str, default="Adam")
+    parser.add_argument("--denoise", type=str, default="false")
+    parser.add_argument("--transofrm_type", type=str, default="bitflip")
     parser.add_argument("--learning_rate", type=float, default=0.0008)
     return parser.parse_args()
 
@@ -50,21 +52,21 @@ hyper_params = {
 comet_logger.log_hyperparams(hyper_params)
 
 
-original_dataset = ClustersDataset(
-    "Autoencoders/Autoencoder/Dataset split/Base datasets/result_df_gt_2_ne_type_link.parquet",
+original_dataset = ClusterDataset(
+    "Autoencoders/Autoencoder/Dataset split/Base datasets/result_df_gt_2_slogan.parquet",
     hyper_params["denoise"],
     hyper_params["transofrm_type"],
 )
 
 
 train_indexes = pd.read_csv(
-    "Autoencoders/Autoencoder/Dataset split/Base datasets/train_indexes_link.csv"
+    "Autoencoders/Autoencoder/Dataset split/Base datasets/train_indexes_slogan.csv"
 ).values.flatten()
 val_indexes = pd.read_csv(
-    "Autoencoders/Autoencoder/Dataset split/Base datasets/val_indexes_link.csv"
+    "Autoencoders/Autoencoder/Dataset split/Base datasets/val_indexes_slogan.csv"
 ).values.flatten()
 test_indexes = pd.read_csv(
-    "Autoencoders/Autoencoder/Dataset split/Base datasets/test_indexes_link.csv"
+    "Autoencoders/Autoencoder/Dataset split/Base datasets/test_indexes_slogan.csv"
 ).values.flatten()
 
 
@@ -116,7 +118,7 @@ trainer = pl.Trainer(
     max_epochs=hyper_params["epochs"],
     callbacks=[early_stop_callback],
     logger=comet_logger,
-    default_root_dir="Checkpoints/",
+    default_root_dir="Checkpoints/slogan/",
 )
 
 
