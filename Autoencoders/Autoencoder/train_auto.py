@@ -15,7 +15,7 @@ with open("config.txt", "r") as file:
 
 comet_logger = CometLogger(
     api_key=API_KEY,
-    project_name="TIM_thesis",
+    project_name="Fibercop_thesis",
     experiment_name="TIM autoencoder two layer 30epochs ",
 )
 
