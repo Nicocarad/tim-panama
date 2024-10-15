@@ -28,6 +28,7 @@ class LinearAutoencoder(pl.LightningModule):
         self.optimizer_type = hyper_params["optimizer"]
         self.learning_rate = self.hyper_params["learning_rate"]
         self.denoise = self.hyper_params["denoise"]
+        self.scale_factor = self.hyper_params["scale_factor"]
 
         self.slogans = slogans
         self.dropout_rate = 0.3
@@ -91,7 +92,7 @@ class LinearAutoencoder(pl.LightningModule):
 
         return optimizer
 
-    def compute_loss(self, x, x_hat, scale_factor=1000):
+    def compute_loss(self, x, x_hat, scale_factor=100):
         loss = nn.BCELoss()(x_hat, x)
         scaled_loss = loss * scale_factor
         return scaled_loss
@@ -154,8 +155,8 @@ class LinearAutoencoder(pl.LightningModule):
             sync_dist=True,
         )
         column_wise_f1 = self.column_wise_f1_per_column.compute()
-        for i, val in enumerate(column_wise_f1):
-            self.log(f"val_f1_{self.slogans[i]}", val, sync_dist=True)
+        # for i, val in enumerate(column_wise_f1):
+        #     self.log(f"val_f1_{self.slogans[i]}", val, sync_dist=True)
 
         self.perfect_reconstruction.reset()
         self.column_wise_accuracy.reset()
@@ -202,8 +203,8 @@ class LinearAutoencoder(pl.LightningModule):
             sync_dist=True,
         )
         column_wise_f1 = self.column_wise_f1_per_column.compute()
-        for i, val in enumerate(column_wise_f1):
-            self.log(f"test_f1_{self.slogans[i]}", val, sync_dist=True)
+        # for i, val in enumerate(column_wise_f1):
+        #     self.log(f"test_f1_{self.slogans[i]}", val, sync_dist=True)
 
         self.perfect_reconstruction.reset()
         self.column_wise_accuracy.reset()

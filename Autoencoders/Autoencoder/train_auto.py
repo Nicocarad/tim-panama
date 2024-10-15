@@ -13,14 +13,6 @@ import argparse
 with open("config.txt", "r") as file:
     API_KEY = file.read().strip()
 
-comet_logger = CometLogger(
-    api_key=API_KEY,
-    project_name="Fibercop_thesis",
-    experiment_name="TIM autoencoder two layer 30epochs ",
-)
-
-experiment = Experiment(api_key=API_KEY)
-
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
@@ -32,6 +24,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--denoise", type=str, default="false")
     parser.add_argument("--transofrm_type", type=str, default="bitflip")
     parser.add_argument("--learning_rate", type=float, default=0.0008)
+    parser.add_argument("--scale_factor", type=float, default=1.0)
+    parser.add_argument("--dataset_path", type=str)
+    parser.add_argument("--train_indexes_path", type=str)
+    parser.add_argument("--val_indexes_path", type=str)
+    parser.add_argument("--test_indexes_path", type=str)
+    parser.add_argument("--experiment_name", type=str)
     return parser.parse_args()
 
 
@@ -47,27 +45,35 @@ hyper_params = {
     "optimizer": args.optimizer,
     "denoise": args.denoise,
     "transofrm_type": args.transofrm_type,
+    "scale_factor": args.scale_factor,
+    "dataset_path": args.dataset_path,
+    "train_indexes_path": args.train_indexes_path,
+    "val_indexes_path": args.val_indexes_path,
+    "test_indexes_path": args.test_indexes_path,
 }
+
+
+comet_logger = CometLogger(
+    api_key=API_KEY,
+    project_name="Fibercop_thesis",
+    experiment_name="TIM autoencoder " + hyper_params["experiment_name"],
+)
+
+experiment = Experiment(api_key=API_KEY)
 
 comet_logger.log_hyperparams(hyper_params)
 
 
 original_dataset = ClusterDataset(
-    "Autoencoders/Autoencoder/Dataset split/Base datasets/result_df_gt_2_slogan.parquet",
+    hyper_params["dataset_path"],
     hyper_params["denoise"],
     hyper_params["transofrm_type"],
 )
 
 
-train_indexes = pd.read_csv(
-    "Autoencoders/Autoencoder/Dataset split/Base datasets/train_indexes_slogan.csv"
-).values.flatten()
-val_indexes = pd.read_csv(
-    "Autoencoders/Autoencoder/Dataset split/Base datasets/val_indexes_slogan.csv"
-).values.flatten()
-test_indexes = pd.read_csv(
-    "Autoencoders/Autoencoder/Dataset split/Base datasets/test_indexes_slogan.csv"
-).values.flatten()
+train_indexes = pd.read_csv(hyper_params["train_indexes_path"]).values.flatten()
+val_indexes = pd.read_csv(hyper_params["val_indexes_path"]).values.flatten()
+test_indexes = pd.read_csv(hyper_params["test_indexes_path"]).values.flatten()
 
 
 train_dataset = Subset(original_dataset, train_indexes)
@@ -118,7 +124,7 @@ trainer = pl.Trainer(
     max_epochs=hyper_params["epochs"],
     callbacks=[early_stop_callback],
     logger=comet_logger,
-    default_root_dir="Checkpoints/slogan/",
+    default_root_dir="Checkpoints/" + hyper_params["experiment_name"] + "/",
 )
 
 
