@@ -92,9 +92,9 @@ class LinearAutoencoder(pl.LightningModule):
 
         return optimizer
 
-    def compute_loss(self, x, x_hat, scale_factor=100):
+    def compute_loss(self, x, x_hat):
         loss = nn.BCELoss()(x_hat, x)
-        scaled_loss = loss * scale_factor
+        scaled_loss = loss * self.scale_factor
         return scaled_loss
 
     def update_metrics(self, x, x_hat):

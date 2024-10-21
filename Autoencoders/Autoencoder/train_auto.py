@@ -50,6 +50,7 @@ hyper_params = {
     "train_indexes_path": args.train_indexes_path,
     "val_indexes_path": args.val_indexes_path,
     "test_indexes_path": args.test_indexes_path,
+    "experiment_name": args.experiment_name,
 }
 
 
@@ -65,15 +66,15 @@ comet_logger.log_hyperparams(hyper_params)
 
 
 original_dataset = ClusterDataset(
-    hyper_params["dataset_path"],
+    "Autoencoders/Autoencoder/Dataset split/Base datasets/"+ hyper_params["dataset_path"],
     hyper_params["denoise"],
     hyper_params["transofrm_type"],
 )
 
 
-train_indexes = pd.read_csv(hyper_params["train_indexes_path"]).values.flatten()
-val_indexes = pd.read_csv(hyper_params["val_indexes_path"]).values.flatten()
-test_indexes = pd.read_csv(hyper_params["test_indexes_path"]).values.flatten()
+train_indexes = pd.read_csv("Autoencoders/Autoencoder/Dataset split/Base datasets/" + hyper_params["train_indexes_path"]).values.flatten()
+val_indexes = pd.read_csv("Autoencoders/Autoencoder/Dataset split/Base datasets/"+ hyper_params["val_indexes_path"]).values.flatten()
+test_indexes = pd.read_csv("Autoencoders/Autoencoder/Dataset split/Base datasets/"+ hyper_params["test_indexes_path"]).values.flatten()
 
 
 train_dataset = Subset(original_dataset, train_indexes)
