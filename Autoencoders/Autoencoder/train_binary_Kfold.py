@@ -35,6 +35,7 @@ def parse_args():
         type=int,
         default=32,
     )
+    parse.add_argument("--input_size_auto", type=int, default=32)
 
     parse.add_argument(
         "--batch_size",
@@ -65,6 +66,11 @@ def parse_args():
         type=float,
         default=0.0008,
     )
+    parse.add_argument("--checkpoint_path", type=str, default=None)
+    parse.add_argument("--dataset_path", type=str)
+    parse.add_argument("--train_indexes_path", type=str)
+    parse.add_argument("--val_indexes_path", type=str)
+    parse.add_argument("--test_indexes_path", type=str)
 
     return parse.parse_args()
 
@@ -78,6 +84,11 @@ hyper_params = {
     "cutting_threshold": args.cutting_threshold,
     "optimizer": args.optimizer,
     "learning_rate": args.learning_rate,
+    "checkpoint_path": args.checkpoint,
+    "dataset_path": args.dataset_path,
+    "train_indexes_path": args.train_indexes_path,
+    "val_indexes_path": args.val_indexes_path,
+    "test_indexes_path": args.test_indexes_path,
 }
 
 comet_logger.log_hyperparams(hyper_params)
@@ -86,7 +97,7 @@ hyper_params_auto = {
     "learning_rate": 1e-3,
     "batch_size": 64,
     "epochs": 30,
-    "input_size": 1776,
+    "input_size": args.input_size_auto,
     "cutting_threshold": 0.5,
     "optimizer": "Adam",
     "denoise": False,
@@ -95,14 +106,24 @@ hyper_params_auto = {
 
 
 original_dataset = LavoriProgrammatiDataset(
-    "Autoencoders/Autoencoder/Dataset split/Lavoro Programmato datasets/result_df_gt_2_lavoriprogrammati.parquet",
+    "Autoencoders/Autoencoder/Dataset split/Lavoro Programmato datasets/"
+    + hyper_params["dataset_path"],
     "Autoencoders/Autoencoder/Dataset split/Lavoro Programmato datasets/20230101-20240101_real_time_clusters_filtered_guasto_cavo.csv",
 )
 
 
-train_indexes = pd.read_csv("Autoencoders/Autoencoder/Dataset split/Lavoro Programmato datasets/train_indexes_link_lp.csv").values.flatten()
-val_indexes = pd.read_csv("Autoencoders/Autoencoder/Dataset split/Lavoro Programmato datasets/val_indexes_link_lp.csv").values.flatten()
-test_indexes = pd.read_csv("Autoencoders/Autoencoder/Dataset split/Lavoro Programmato datasets/test_indexes_link_lp.csv").values.flatten()
+train_indexes = pd.read_csv(
+    "Autoencoders/Autoencoder/Dataset split/Lavoro Programmato datasets/"
+    + hyper_params["train_indexes_path"]
+).values.flatten()
+val_indexes = pd.read_csv(
+    "Autoencoders/Autoencoder/Dataset split/Lavoro Programmato datasets/"
+    + hyper_params["val_indexes_path"]
+).values.flatten()
+test_indexes = pd.read_csv(
+    "Autoencoders/Autoencoder/Dataset split/Lavoro Programmato datasets/"
+    + hyper_params["test_indexes_path"]
+).values.flatten()
 
 
 all_indexes = np.concatenate([train_indexes, val_indexes, test_indexes])
@@ -128,7 +149,9 @@ torch.manual_seed(42)
 
 
 autoencoder = LinearAutoencoder.load_from_checkpoint(
-    "Autoencoders/Autoencoder/Checkpoints/epoch=20-step=141540.ckpt", hyper_params=hyper_params_auto, slogans=None
+    "Autoencoders/Autoencoder/Checkpoints/" + hyper_params["checkpoint_path"],
+    hyper_params=hyper_params_auto,
+    slogans=None,
 )
 
 encoder = autoencoder.encoder
@@ -136,7 +159,20 @@ encoder = autoencoder.encoder
 
 for iter in range(NUM_FOLD):
 
-    folds = [fold1, fold2, fold3, fold4, fold5, fold6, fold7, fold8, fold9, fold10, fold11, fold12]
+    folds = [
+        fold1,
+        fold2,
+        fold3,
+        fold4,
+        fold5,
+        fold6,
+        fold7,
+        fold8,
+        fold9,
+        fold10,
+        fold11,
+        fold12,
+    ]
     train_idx = np.concatenate([f for i, f in enumerate(folds) if i != iter])
     val_idx = folds[iter]
 
@@ -177,7 +213,6 @@ for iter in range(NUM_FOLD):
     trainer.test(classifier, val_loader)
 
     results.append(classifier.result_metrics)
-
 
 
 sum_metrics = {
